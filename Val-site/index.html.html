@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Val — Agente Virtual</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f5ede8;min-height:100vh;display:flex;align-items:center;justify-content:center}
+button{cursor:pointer}
+#login-screen{background:#fff;border-radius:20px;padding:40px 36px;width:360px;box-shadow:0 8px 32px rgba(180,100,100,.12);text-align:center}
+.avatar{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#c97d7d,#e8b4b8);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:40px}
+#login-screen h1{color:#7a3f3f;font-size:1.5rem;margin-bottom:4px}
+#login-screen p{color:#999;font-size:.88rem;margin-bottom:28px}
+.field{text-align:left;margin-bottom:16px}
+.field label{font-size:.82rem;color:#7a3f3f;font-weight:600;display:block;margin-bottom:6px}
+.field input{width:100%;padding:10px 14px;border:1.5px solid #e8c8c8;border-radius:10px;font-size:.95rem;color:#333;outline:none;transition:border .2s}
+.field input:focus{border-color:#c97d7d}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#c97d7d,#d4a0a0);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:600;transition:opacity .2s}
+.btn-primary:hover{opacity:.88}
+#login-error{color:#c0392b;font-size:.84rem;margin-top:12px;display:none}
+#chat-screen{display:none;flex-direction:column;width:100%;max-width:700px;height:100vh;max-height:700px;background:#fff;border-radius:20px;box-shadow:0 8px 32px rgba(180,100,100,.12);overflow:hidden}
+.chat-header{background:linear-gradient(135deg,#c97d7d,#e8b4b8);padding:16px 20px;display:flex;align-items:center;gap:14px}
+.chat-header .av{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.chat-header .info h2{color:#fff;font-size:1.1rem}
+.chat-header .info span{color:rgba(255,255,255,.85);font-size:.78rem}
+.logout-btn{margin-left:auto;background:rgba(255,255,255,.25);border:none;color:#fff;padding:7px 14px;border-radius:20px;font-size:.8rem}
+.logout-btn:hover{background:rgba(255,255,255,.4)}
+.chat-messages{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:12px;background:#fdf6f3}
+.msg{max-width:75%;display:flex;flex-direction:column;gap:4px}
+.msg.val{align-self:flex-start}
+.msg.user{align-self:flex-end}
+.msg .bubble{padding:11px 16px;border-radius:18px;font-size:.92rem;line-height:1.5}
+.msg.val .bubble{background:#fff;color:#333;border-bottom-left-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.msg.user .bubble{background:linear-gradient(135deg,#c97d7d,#d4a0a0);color:#fff;border-bottom-right-radius:4px}
+.msg .name{font-size:.75rem;color:#aaa;padding:0 4px}
+.msg.user .name{text-align:right}
+.typing .bubble{color:#bbb;font-style:italic}
+.chat-input{padding:14px 16px;background:#fff;border-top:1px solid #f0e0e0;display:flex;gap:10px;align-items:center}
+.chat-input textarea{flex:1;border:1.5px solid #e8c8c8;border-radius:12px;padding:10px 14px;font-size:.93rem;resize:none;outline:none;font-family:inherit;height:44px;line-height:1.4;transition:border .2s}
+.chat-input textarea:focus{border-color:#c97d7d}
+.send-btn{background:linear-gradient(135deg,#c97d7d,#d4a0a0);border:none;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send-btn svg{fill:#fff;width:20px;height:20px}
+.send-btn:disabled{opacity:.5;cursor:default}
+#admin-screen{display:none;flex-direction:column;width:100%;max-width:900px;height:100vh;max-height:760px;background:#fff;border-radius:20px;box-shadow:0 8px 32px rgba(180,100,100,.12);overflow:hidden}
+.admin-header{background:linear-gradient(135deg,#7a3f3f,#c97d7d);padding:16px 24px;display:flex;align-items:center;gap:12px}
+.admin-header h2{color:#fff;font-size:1.1rem;flex:1}
+.admin-header span{color:rgba(255,255,255,.8);font-size:.82rem}
+.admin-tabs{display:flex;background:#fdf6f3;border-bottom:2px solid #f0e0e0}
+.tab-btn{padding:12px 22px;border:none;background:none;font-size:.9rem;color:#999;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab-btn.active{color:#c97d7d;border-bottom-color:#c97d7d}
+.tab-btn:hover{color:#c97d7d}
+.admin-body{flex:1;overflow-y:auto;padding:24px}
+.user-card{background:#fdf6f3;border:1px solid #f0e0e0;border-radius:12px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.user-card .uname{font-weight:600;color:#7a3f3f}
+.user-card .umeta{font-size:.8rem;color:#aaa;margin-top:2px}
+.btn-sm{padding:6px 14px;border-radius:8px;font-size:.82rem;border:none;font-weight:600}
+.btn-outline{background:#fff;border:1.5px solid #c97d7d;color:#c97d7d}
+.btn-outline:hover{background:#fdf6f3}
+.btn-danger{background:#fff;border:1.5px solid #e74c3c;color:#e74c3c}
+.btn-danger:hover{background:#fff5f5}
+.conv-view{display:none}
+.conv-view.open{display:block}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;color:#c97d7d;font-weight:600;margin-bottom:16px;font-size:.9rem}
+.conv-msg{margin-bottom:10px;padding:10px 14px;border-radius:10px;font-size:.88rem;line-height:1.5}
+.conv-msg.val{background:#fdf6f3;border-left:3px solid #e8b4b8}
+.conv-msg.user{background:#f9f0f0;border-left:3px solid #c97d7d}
+.conv-msg .who{font-size:.75rem;font-weight:700;margin-bottom:4px;color:#999}
+.conv-meta{font-size:.78rem;color:#bbb;margin-bottom:16px}
+.config-section{margin-bottom:28px}
+.config-section h3{color:#7a3f3f;font-size:.95rem;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #f0e0e0}
+.config-section textarea,.config-section input[type=text]{width:100%;padding:10px 14px;border:1.5px solid #e8c8c8;border-radius:10px;font-size:.9rem;font-family:inherit;outline:none;resize:vertical;transition:border .2s}
+.config-section textarea:focus,.config-section input[type=text]:focus{border-color:#c97d7d}
+.config-label{font-size:.82rem;color:#7a3f3f;font-weight:600;display:block;margin-bottom:6px;margin-top:12px}
+.btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn-save{background:linear-gradient(135deg,#c97d7d,#d4a0a0);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-weight:600;font-size:.9rem}
+.btn-save:hover{opacity:.88}
+.btn-reset{background:#fff;border:1.5px solid #aaa;color:#777;border-radius:10px;padding:10px 18px;font-weight:600;font-size:.9rem}
+.btn-reset:hover{background:#f5f5f5}
+.save-ok{color:#27ae60;font-size:.84rem;display:none;align-items:center;gap:4px}
+.kb-item{background:#fdf6f3;border:1px solid #f0e0e0;border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.kb-item .kb-info .kb-title{font-weight:600;color:#7a3f3f;font-size:.9rem}
+.kb-item .kb-info .kb-meta{font-size:.75rem;color:#aaa;margin-top:2px}
+.kb-item .kb-info .kb-preview{font-size:.82rem;color:#888;margin-top:4px;max-width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drop-area{border:2px dashed #e8c8c8;border-radius:12px;padding:28px;text-align:center;color:#bbb;font-size:.9rem;margin-bottom:16px;transition:all .2s;background:#fdf6f3}
+.drop-area.over{border-color:#c97d7d;background:#fdf0f0}
+.tabs-kb{display:flex;gap:8px;margin-bottom:16px}
+.tab-kb{padding:8px 16px;border-radius:20px;border:1.5px solid #e8c8c8;background:#fff;color:#999;font-size:.85rem;font-weight:600;transition:all .2s}
+.tab-kb.active{background:#c97d7d;border-color:#c97d7d;color:#fff}
+#kb-text-area{display:none}
+#kb-file-area{display:block}
+.empty-state{text-align:center;color:#ccc;padding:32px 0;font-size:.9rem}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="avatar">🌸</div>
+  <h1>Olá, eu sou a Val</h1>
+  <p>Insira suas credenciais para iniciar a conversa</p>
+  <div class="field"><label>Usuário</label><input type="text" id="username" placeholder="Seu nome de usuário"/></div>
+  <div class="field"><label>Senha</label><input type="password" id="password" placeholder="Sua senha"/></div>
+  <button class="btn-primary" id="login-btn">Entrar</button>
+  <div id="login-error">Usuário ou senha incorretos.</div>
+</div>
+
+<div id="chat-screen">
+  <div class="chat-header">
+    <div class="av">🌸</div>
+    <div class="info"><h2>Val</h2><span>Agente Virtual • Saúde &amp; Relacionamentos</span></div>
+    <button class="logout-btn" onclick="logout()">Sair</button>
+  </div>
+  <div class="chat-messages" id="messages"></div>
+  <div class="chat-input">
+    <textarea id="msg-input" placeholder="Digite sua mensagem..." rows="1"></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div id="admin-screen">
+  <div class="admin-header">
+    <h2>⚙️ Painel Administrativo — Val</h2>
+    <span id="admin-user-label"></span>
+    <button class="logout-btn" onclick="logout()">Sair</button>
+  </div>
+  <div class="admin-tabs">
+    <button class="tab-btn active" onclick="openTab('hist')">💬 Histórico</button>
+    <button class="tab-btn" onclick="openTab('config')">🛠 Configurações da Val</button>
+    <button class="tab-btn" onclick="openTab('kb')">📚 Base de Conhecimento</button>
+  </div>
+  <div class="admin-body">
+    <div id="tab-hist">
+      <div id="hist-list"></div>
+      <div id="hist-conv" class="conv-view">
+        <button class="back-btn" onclick="closeConv()">← Voltar</button>
+        <div id="conv-content"></div>
+      </div>
+    </div>
+    <div id="tab-config" style="display:none">
+      <div class="config-section">
+        <h3>🌸 Personalidade e Tom</h3>
+        <label class="config-label">Descrição da Val</label>
+        <textarea id="cfg-personality" rows="4"></textarea>
+      </div>
+      <div class="config-section">
+        <h3>📌 Temas Permitidos</h3>
+        <label class="config-label">Temas que a Val pode abordar</label>
+        <textarea id="cfg-topics" rows="3"></textarea>
+      </div>
+      <div class="config-section">
+        <h3>📝 Instruções Especiais</h3>
+        <label class="config-label">Regras e orientações extras</label>
+        <textarea id="cfg-rules" rows="3"></textarea>
+      </div>
+      <div class="config-section">
+        <h3>👋 Mensagem de Boas-Vindas</h3>
+        <label class="config-label">O que a Val diz ao iniciar</label>
+        <textarea id="cfg-welcome" rows="2"></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn-save" onclick="saveConfig()">💾 Salvar</button>
+        <button class="btn-reset" onclick="resetConfig()">↩ Restaurar Padrão</button>
+        <span class="save-ok" id="save-ok">✔ Salvo!</span>
+      </div>
+    </div>
+    <div id="tab-kb" style="display:none">
+      <div class="tabs-kb">
+        <button class="tab-kb active" onclick="switchKbTab('file')">📎 Upload de Arquivo</button>
+        <button class="tab-kb" onclick="switchKbTab('text')">✏️ Colar Texto</button>
+      </div>
+      <div id="kb-file-area">
+        <div class="drop-area" id="drop-area" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+          <div style="font-size:2rem">📄</div>
+          <strong>Arraste um arquivo aqui</strong>
+          <p>ou <label style="color:#c97d7d;cursor:pointer;text-decoration:underline">selecione do computador<input type="file" id="file-input" accept=".pdf,.txt,.doc,.docx" style="display:none" onchange="handleFile(this.files[0])"/></label></p>
+          <p style="margin-top:4px;font-size:.75rem;color:#ccc">PDF, TXT, DOC, DOCX</p>
+        </div>
+      </div>
+      <div id="kb-text-area">
+        <label class="config-label">Título do conteúdo</label>
+        <input type="text" id="kb-title" placeholder="Ex: Protocolo de ansiedade..."/>
+        <label class="config-label" style="margin-top:12px">Conteúdo</label>
+        <textarea id="kb-text" rows="7" style="width:100%;padding:10px 14px;border:1.5px solid #e8c8c8;border-radius:10px;font-size:.9rem;font-family:inherit;outline:none;resize:vertical" placeholder="Cole aqui o texto..."></textarea>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn-save" onclick="saveKbText()">💾 Salvar Conteúdo</button>
+          <span class="save-ok" id="kb-ok">✔ Salvo!</span>
+        </div>
+      </div>
+      <h3 style="color:#7a3f3f;font-size:.95rem;font-weight:700;margin:20px 0 12px;padding-bottom:6px;border-bottom:1px solid #f0e0e0">📋 Conteúdos Cadastrados</h3>
+      <div id="kb-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const USERS = {
+  maria:"rosa123", joao:"azul456", ana:"verde789",
+  carlos:"sol2024", patricia:"flores1"
+};
+const ADMIN = { user:"admin", pass:"admin2024" };
+
+const DEFAULT_CONFIG = {
+  personality:`Você é Val, uma mulher de 50 anos, educada, formal e acolhedora. Especialista em saúde e relacionamentos. Responda sempre em português do Brasil, de forma respeitosa, empática e formal. Use "você" (nunca "tu"). Seja paciente e gentil. Nunca se apresente como IA ou robô.`,
+  topics:`Responda APENAS sobre saúde (bem-estar, saúde mental, física, preventiva) e relacionamentos (família, amizades, amor, autoestima). Se perguntarem outro tema, diga educadamente que só trata desses assuntos.`,
+  rules:`Nunca forneça diagnósticos médicos definitivos. Recomende sempre buscar um profissional quando necessário. Mantenha confidencialidade e respeito absoluto.`,
+  welcome:`Olá! Seja muito bem-vindo(a). É um prazer ter você aqui. Meu nome é Val, e estou aqui para conversar sobre saúde e relacionamentos. Como posso ajudá-lo(a) hoje?`
+};
+
+let currentUser = null;
+let conversationHistory = [];
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogin(){
+  const u = document.getElementById('username').value.trim().toLowerCase();
+  const p = document.getElementById('password').value.trim();
+  if(u===ADMIN.user && p===ADMIN.pass){
+    currentUser='admin';
+    show('admin-screen');
+    loadAdminData();
+  } else if(USERS[u] && USERS[u]===p){
+    currentUser=u;
+    show('chat-screen');
+    startChat();
+  } else {
+    document.getElementById('login-error').style.display='block';
+  }
+}
+
+function logout(){
+  currentUser=null; conversationHistory=[];
+  document.getElementById('messages').innerHTML='';
+  document.getElementById('username').value='';
+  document.getElementById('password').value='';
+  document.getElementById('login-error').style.display='none';
+  hideAll(); show('login-screen');
+}
+
+function show(id){ document.getElementById(id).style.display='flex'; }
+function hideAll(){
+  ['login-screen','chat-screen','admin-screen'].forEach(id=>{
+    document.getElementById(id).style.display='none';
+  });
+}
+
+async function startChat(){
+  const cfg = await getConfig();
+  try{
+    const r = await window.storage.get(`hist_${currentUser}`);
+    if(r){
+      const hist = JSON.parse(r.value);
+      if(hist.length > 0){
+        hist.forEach(m=>{
+          addMessage('user', m.user);
+          addMessage('val', m.val);
+          conversationHistory.push({role:'user', content:m.user});
+          conversationHistory.push({role:'assistant', content:m.val});
+        });
+        const typing = addMessage('val','Val está digitando...',true);
+        try{
+          const reply = await callVal([...conversationHistory, {role:'user', content:'[O usuário retornou. Cumprimente-o brevemente pelo retorno de forma calorosa e formal.]'}]);
+          typing.remove(); addMessage('val', reply);
+          conversationHistory.push({role:'assistant', content:reply});
+        }catch{ typing.remove(); addMessage('val','Bem-vindo(a) de volta! Como posso ajudá-lo(a) hoje?'); }
+        return;
+      }
+    }
+  }catch{}
+  addMessage('val', cfg.welcome);
+}
+
+function addMessage(from, text, isTyping=false){
+  const msgs=document.getElementById('messages');
+  const div=document.createElement('div');
+  div.className=`msg ${from}${isTyping?' typing':''}`;
+  div.innerHTML=`<span class="name">${from==='val'?'Val':currentUser}</span><div class="bubble">${text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+// ── CHAMADA À API — via rota segura da Vercel ──
+async function callVal(messages){
+  const [cfg, kb] = await Promise.all([getConfig(), getKbContent()]);
+  const kbSection = kb.length ? `\n\n## BASE DE CONHECIMENTO:\n${kb.map(k=>`### ${k.title}\n${k.content}`).join('\n\n')}` : '';
+  const system = `${cfg.personality}\n\n${cfg.topics}\n\n${cfg.rules}${kbSection}`;
+  const res = await fetch('/api/chat', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ system, messages })
+  });
+  if(!res.ok) throw new Error('Erro na API');
+  const data = await res.json();
+  return data.reply;
+}
+
+async function sendMessage(){
+  const input=document.getElementById('msg-input');
+  const text=input.value.trim();
+  if(!text) return;
+  input.value='';
+  document.getElementById('send-btn').disabled=true;
+  addMessage('user',text);
+  conversationHistory.push({role:'user',content:text});
+  const typing=addMessage('val','Val está digitando...',true);
+  try{
+    const reply = await callVal(conversationHistory);
+    typing.remove();
+    addMessage('val',reply);
+    conversationHistory.push({role:'assistant',content:reply});
+    await saveHistory(text, reply);
+  }catch{
+    typing.remove();
+    addMessage('val','Desculpe, ocorreu um erro de conexão. Por favor, tente novamente.');
+  }
+  document.getElementById('send-btn').disabled=false;
+  input.focus();
+}
+
+document.getElementById('msg-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+});
+
+async function getConfig(){
+  try{const r=await window.storage.get('val_config');return r?JSON.parse(r.value):DEFAULT_CONFIG;}
+  catch{return DEFAULT_CONFIG;}
+}
+
+async function saveHistory(userMsg, valMsg){
+  const key=`hist_${currentUser}`;
+  let history=[];
+  try{const r=await window.storage.get(key);if(r)history=JSON.parse(r.value);}catch{}
+  history.push({ts:new Date().toISOString(),user:userMsg,val:valMsg});
+  try{await window.storage.set(key,JSON.stringify(history));}catch(e){console.error(e);}
+}
+
+async function getKbContent(){
+  try{
+    const r=await window.storage.list('kb_');
+    if(!r||!r.keys||r.keys.length===0) return [];
+    const items=[];
+    for(const k of r.keys){try{const d=await window.storage.get(k);if(d)items.push(JSON.parse(d.value));}catch{}}
+    return items;
+  }catch{return [];}
+}
+
+function openTab(t){
+  ['hist','config','kb'].forEach(id=>{document.getElementById(`tab-${id}`).style.display=id===t?'block':'none';});
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['hist','config','kb'][i]===t));
+  if(t==='hist') loadHistList();
+  if(t==='config') loadConfigForm();
+  if(t==='kb') loadKbList();
+}
+
+function loadAdminData(){ loadHistList(); }
+
+async function loadHistList(){
+  const el=document.getElementById('hist-list');
+  el.innerHTML='<p style="color:#ccc;text-align:center;padding:20px">Carregando...</p>';
+  document.getElementById('hist-conv').classList.remove('open');
+  try{
+    const r=await window.storage.list('hist_');
+    if(!r||!r.keys||r.keys.length===0){el.innerHTML='<div class="empty-state">Nenhuma conversa registrada ainda.</div>';return;}
+    el.innerHTML='';
+    for(const k of r.keys){
+      try{
+        const d=await window.storage.get(k);if(!d)continue;
+        const hist=JSON.parse(d.value);
+        const uname=k.replace('hist_','');
+        const last=hist[hist.length-1];
+        const dt=last?new Date(last.ts).toLocaleString('pt-BR'):'';
+        const card=document.createElement('div');
+        card.className='user-card';
+        card.innerHTML=`<div><div class="uname">👤 ${uname}</div><div class="umeta">${hist.length} mensagem(ns) • Última: ${dt}</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm btn-outline" onclick="viewConv('${k}','${uname}')">Ver conversa</button>
+            <button class="btn-sm btn-danger" onclick="deleteConv('${k}')">Apagar</button>
+          </div>`;
+        el.appendChild(card);
+      }catch{}
+    }
+  }catch{el.innerHTML='<div class="empty-state">Erro ao carregar histórico.</div>';}
+}
+
+async function viewConv(key,uname){
+  document.getElementById('hist-list').style.display='none';
+  document.getElementById('hist-conv').classList.add('open');
+  const content=document.getElementById('conv-content');
+  try{
+    const d=await window.storage.get(key);
+    const hist=JSON.parse(d.value);
+    content.innerHTML=`<h3 style="color:#7a3f3f;margin-bottom:4px">Conversa de ${uname}</h3><div class="conv-meta">${hist.length} trocas registradas</div>`;
+    hist.forEach(m=>{
+      const dt=new Date(m.ts).toLocaleString('pt-BR');
+      content.innerHTML+=`<div class="conv-msg user"><div class="who">👤 ${uname} — ${dt}</div>${m.user}</div>
+        <div class="conv-msg val"><div class="who">🌸 Val</div>${m.val}</div>`;
+    });
+  }catch{content.innerHTML='<p style="color:#ccc">Erro ao carregar conversa.</p>';}
+}
+
+function closeConv(){
+  document.getElementById('hist-list').style.display='block';
+  document.getElementById('hist-conv').classList.remove('open');
+}
+
+async function deleteConv(key){
+  if(!confirm('Apagar todo o histórico deste usuário?')) return;
+  await window.storage.delete(key); loadHistList();
+}
+
+async function loadConfigForm(){
+  const cfg=await getConfig();
+  document.getElementById('cfg-personality').value=cfg.personality;
+  document.getElementById('cfg-topics').value=cfg.topics;
+  document.getElementById('cfg-rules').value=cfg.rules;
+  document.getElementById('cfg-welcome').value=cfg.welcome;
+}
+
+async function saveConfig(){
+  const cfg={
+    personality:document.getElementById('cfg-personality').value,
+    topics:document.getElementById('cfg-topics').value,
+    rules:document.getElementById('cfg-rules').value,
+    welcome:document.getElementById('cfg-welcome').value
+  };
+  await window.storage.set('val_config',JSON.stringify(cfg));
+  const ok=document.getElementById('save-ok');
+  ok.style.display='flex'; setTimeout(()=>ok.style.display='none',2500);
+}
+
+async function resetConfig(){
+  if(!confirm('Restaurar configurações padrão?')) return;
+  await window.storage.set('val_config',JSON.stringify(DEFAULT_CONFIG));
+  loadConfigForm();
+}
+
+function switchKbTab(t){
+  document.getElementById('kb-file-area').style.display=t==='file'?'block':'none';
+  document.getElementById('kb-text-area').style.display=t==='text'?'block':'none';
+  document.querySelectorAll('.tab-kb').forEach((b,i)=>b.classList.toggle('active',['file','text'][i]===t));
+}
+
+async function loadKbList(){
+  const el=document.getElementById('kb-list');
+  const items=await getKbContent();
+  if(items.length===0){el.innerHTML='<div class="empty-state">Nenhum conteúdo cadastrado ainda.</div>';return;}
+  el.innerHTML='';
+  items.forEach(item=>{
+    const d=document.createElement('div');
+    d.className='kb-item';
+    d.innerHTML=`<div class="kb-info">
+      <div class="kb-title">${item.title}</div>
+      <div class="kb-meta">${item.type||'Texto'} • ${new Date(item.ts).toLocaleDateString('pt-BR')}</div>
+      <div class="kb-preview">${item.content}</div>
+    </div><button class="btn-sm btn-danger" onclick="deleteKb('${item.id}')">Apagar</button>`;
+    el.appendChild(d);
+  });
+}
+
+async function saveKbText(){
+  const title=document.getElementById('kb-title').value.trim();
+  const text=document.getElementById('kb-text').value.trim();
+  if(!title||!text){alert('Preencha o título e o conteúdo.');return;}
+  const id=`kb_${Date.now()}`;
+  await window.storage.set(id,JSON.stringify({id,title,content:text,type:'Texto',ts:new Date().toISOString()}));
+  document.getElementById('kb-title').value='';
+  document.getElementById('kb-text').value='';
+  const ok=document.getElementById('kb-ok');
+  ok.style.display='flex'; setTimeout(()=>ok.style.display='none',2000);
+  loadKbList();
+}
+
+async function deleteKb(id){
+  if(!confirm('Apagar este conteúdo?')) return;
+  await window.storage.delete(id); loadKbList();
+}
+
+function onDragOver(e){e.preventDefault();document.getElementById('drop-area').classList.add('over');}
+function onDragLeave(){document.getElementById('drop-area').classList.remove('over');}
+function onDrop(e){e.preventDefault();document.getElementById('drop-area').classList.remove('over');const f=e.dataTransfer.files[0];if(f)handleFile(f);}
+
+async function handleFile(file){
+  if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  let text='';
+  if(ext==='txt'){text=await file.text();}
+  else{text=`[Arquivo: ${file.name}]\nPara PDF/DOC, copie e cole o conteúdo na aba "Colar Texto".`;}
+  const id=`kb_${Date.now()}`;
+  const title=file.name.replace(/\.[^.]+$/,'');
+  await window.storage.set(id,JSON.stringify({id,title,content:text,type:ext.toUpperCase(),ts:new Date().toISOString()}));
+  alert(`✅ "${title}" salvo com sucesso!`);
+  loadKbList();
+}
+</script>
+</body>
+</html>
