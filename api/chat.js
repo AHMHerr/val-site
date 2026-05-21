@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
       })
     });
     const d = await r.json();
-    if (!r.ok) return res.status(r.status).json({ error: JSON.stringify(d) });
+    if (!r.ok) return res.status(200).json({ error: JSON.stringify(d) });
     res.status(200).json({ reply: d.content?.map(i => i.text || '').join('') || '' });
   } catch(e) {
     res.status(500).json({ error: e.message });
