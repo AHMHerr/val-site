@@ -1,7 +1,31 @@
 module.exports = async (req, res) => {
-  const key = process.env.ANTHROPIC_API_KEY;
-  res.status(200).json({ 
-    hasKey: !!key,
-    keyStart: key ? key.substring(0, 10) : 'VAZIO'
-  });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+
+  try {
+    const { system, messages } = req.body;
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        system: system || '',
+        messages
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) return res.status(200).json({ error: JSON.stringify(d) });
+    res.status(200).json({ reply: d.content?.map(i => i.text || '').join('') || '' });
+  } catch(e) {
+    res.status(200).json({ error: e.message });
+  }
 };
