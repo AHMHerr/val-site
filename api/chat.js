@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-'x-api-key': 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,
+'x-api-key': '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',
         'anthropic-version': '2023-06-01'
       },
 body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system, messages })    });
