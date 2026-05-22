@@ -29,14 +29,15 @@ module.exports = async (req, res) => {
       const d = await r.json();
       return res.status(200).json(d[0] || DEFAULT_CONFIG);
     }
-
     if (action === 'saveConfig') {
-      await sb('configs', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ id: 'main', ...payload, updated_at: new Date().toISOString() })
-      });
-      return res.status(200).json({ ok: true });
+    const r = await sb('configs', {
+    method: 'POST',
+    headers: { 'Prefer': 'resolution=merge-duplicates' },
+    body: JSON.stringify({ id: 'main', ...payload, updated_at: new Date().toISOString() })
+    });
+    const d = await r.json();
+    console.log('saveConfig result:', JSON.stringify(d));
+    return res.status(200).json({ ok: true, debug: d });
     }
 
     if (action === 'getHistory') {
