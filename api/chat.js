@@ -1,10 +1,19 @@
 const SUPABASE_URL = 'https://wphzopmzryzzwpuhdosi.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHpvcG16cnl6endwdWhkb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MDI5NDYsImV4cCI6MjA5NDk3ODk0Nn0.Uy3Yia4lgFKrCl2wHoQomu-_SvfA-iqdrEhCoMPzfwM';
 
-const sb = (path, opts={}) => fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-  headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...opts.headers },
-  ...opts
-});
+const sb = (path, opts={}) => {
+  const { headers: extraHeaders, ...restOpts } = opts;
+  return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...restOpts,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...extraHeaders
+    }
+  });
+};
 
 const DEFAULT_CONFIG = {
   personality: `Você é Val, uma mulher de 50 anos, educada, formal e acolhedora. Especialista em saúde e relacionamentos. Responda sempre em português do Brasil, de forma respeitosa, empática e formal. Use "você" (nunca "tu"). Seja paciente e gentil. Nunca se apresente como IA ou robô.`,
@@ -29,15 +38,14 @@ module.exports = async (req, res) => {
       const d = await r.json();
       return res.status(200).json(d[0] || DEFAULT_CONFIG);
     }
+
     if (action === 'saveConfig') {
-    const r = await sb('configs', {
-    method: 'POST',
-    headers: { 'Prefer': 'resolution=merge-duplicates' },
-    body: JSON.stringify({ id: 'main', ...payload, updated_at: new Date().toISOString() })
-    });
-    const d = await r.json();
-    console.log('saveConfig result:', JSON.stringify(d));
-    return res.status(200).json({ ok: true, debug: d });
+      await sb('configs', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ id: 'main', ...payload, updated_at: new Date().toISOString() })
+      });
+      return res.status(200).json({ ok: true });
     }
 
     if (action === 'getHistory') {
