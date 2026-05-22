@@ -31,8 +31,11 @@ module.exports = async (req, res) => {
     }
 
     if (action === 'saveConfig') {
-      await sb('configs?id=eq.main', { method: 'DELETE' });
-      await sb('configs', { method: 'POST', body: JSON.stringify({ id: 'main', ...payload }) });
+      await sb('configs', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ id: 'main', ...payload, updated_at: new Date().toISOString() })
+      });
       return res.status(200).json({ ok: true });
     }
 
@@ -81,8 +84,11 @@ module.exports = async (req, res) => {
     }
 
     if (action === 'savePassword') {
-      await sb(`senhas?usuario=eq.${payload.usuario}`, { method: 'DELETE' });
-      await sb('senhas', { method: 'POST', body: JSON.stringify(payload) });
+      await sb('senhas', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ ...payload, updated_at: new Date().toISOString() })
+      });
       return res.status(200).json({ ok: true });
     }
 
