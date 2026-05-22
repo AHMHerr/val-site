@@ -24,8 +24,9 @@ button{cursor:pointer}
 .chat-header .av{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
 .chat-header .info h2{color:#fff;font-size:1.1rem}
 .chat-header .info span{color:rgba(255,255,255,.85);font-size:.78rem}
-.logout-btn{margin-left:auto;background:rgba(255,255,255,.25);border:none;color:#fff;padding:7px 14px;border-radius:20px;font-size:.8rem}
-.logout-btn:hover{background:rgba(255,255,255,.4)}
+.header-btns{margin-left:auto;display:flex;gap:8px}
+.header-btn{background:rgba(255,255,255,.25);border:none;color:#fff;padding:7px 14px;border-radius:20px;font-size:.8rem}
+.header-btn:hover{background:rgba(255,255,255,.4)}
 .chat-messages{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:12px;background:#fdf6f3}
 .msg{max-width:75%;display:flex;flex-direction:column;gap:4px}
 .msg.val{align-self:flex-start}
@@ -42,10 +43,26 @@ button{cursor:pointer}
 .send-btn{background:linear-gradient(135deg,#c97d7d,#d4a0a0);border:none;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .send-btn svg{fill:#fff;width:20px;height:20px}
 .send-btn:disabled{opacity:.5;cursor:default}
+
+/* MODAL SENHA */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px;padding:32px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h3{color:#7a3f3f;font-size:1.1rem;margin-bottom:20px;text-align:center}
+.modal .field{margin-bottom:14px}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.btn-cancel{flex:1;padding:10px;background:#f5f5f5;border:none;border-radius:10px;color:#777;font-weight:600;font-size:.9rem}
+.btn-cancel:hover{background:#eee}
+.btn-confirm{flex:1;padding:10px;background:linear-gradient(135deg,#c97d7d,#d4a0a0);border:none;border-radius:10px;color:#fff;font-weight:600;font-size:.9rem}
+.btn-confirm:hover{opacity:.88}
+.modal-msg{font-size:.84rem;margin-top:10px;text-align:center;min-height:18px}
+.modal-msg.ok{color:#27ae60}
+.modal-msg.err{color:#c0392b}
+
+/* ADMIN */
 #admin-screen{display:none;flex-direction:column;width:100%;max-width:900px;height:100vh;max-height:760px;background:#fff;border-radius:20px;box-shadow:0 8px 32px rgba(180,100,100,.12);overflow:hidden}
 .admin-header{background:linear-gradient(135deg,#7a3f3f,#c97d7d);padding:16px 24px;display:flex;align-items:center;gap:12px}
 .admin-header h2{color:#fff;font-size:1.1rem;flex:1}
-.admin-header span{color:rgba(255,255,255,.8);font-size:.82rem}
 .admin-tabs{display:flex;background:#fdf6f3;border-bottom:2px solid #f0e0e0}
 .tab-btn{padding:12px 22px;border:none;background:none;font-size:.9rem;color:#999;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
 .tab-btn.active{color:#c97d7d;border-bottom-color:#c97d7d}
@@ -65,6 +82,7 @@ button{cursor:pointer}
 .conv-msg{margin-bottom:10px;padding:10px 14px;border-radius:10px;font-size:.88rem;line-height:1.5}
 .conv-msg.val{background:#fdf6f3;border-left:3px solid #e8b4b8}
 .conv-msg.user{background:#f9f0f0;border-left:3px solid #c97d7d}
+.conv-msg.system{background:#f0f7f0;border-left:3px solid #27ae60}
 .conv-msg .who{font-size:.75rem;font-weight:700;margin-bottom:4px;color:#999}
 .conv-meta{font-size:.78rem;color:#bbb;margin-bottom:16px}
 .config-section{margin-bottom:28px}
@@ -90,6 +108,7 @@ button{cursor:pointer}
 #kb-text-area{display:none}
 #kb-file-area{display:block}
 .empty-state{text-align:center;color:#ccc;padding:32px 0;font-size:.9rem}
+.badge-senha{background:#e8f5e9;color:#27ae60;border-radius:6px;padding:2px 8px;font-size:.75rem;font-weight:600;margin-left:8px}
 </style>
 </head>
 <body>
@@ -104,11 +123,29 @@ button{cursor:pointer}
   <div id="login-error">Usuário ou senha incorretos.</div>
 </div>
 
+<!-- MODAL TROCA DE SENHA -->
+<div class="modal-overlay" id="senha-modal">
+  <div class="modal">
+    <h3>🔒 Alterar Senha</h3>
+    <div class="field"><label>Senha atual</label><input type="password" id="senha-atual" placeholder="Digite sua senha atual"/></div>
+    <div class="field"><label>Nova senha</label><input type="password" id="senha-nova" placeholder="Mínimo 6 caracteres"/></div>
+    <div class="field"><label>Confirmar nova senha</label><input type="password" id="senha-confirm" placeholder="Repita a nova senha"/></div>
+    <div class="modal-msg" id="senha-msg"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeSenhaModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="salvarSenha()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div id="chat-screen">
   <div class="chat-header">
     <div class="av">🌸</div>
     <div class="info"><h2>Val</h2><span>Agente Virtual • Saúde &amp; Relacionamentos</span></div>
-    <button class="logout-btn" onclick="logout()">Sair</button>
+    <div class="header-btns">
+      <button class="header-btn" onclick="openSenhaModal()">🔒 Senha</button>
+      <button class="header-btn" onclick="logout()">Sair</button>
+    </div>
   </div>
   <div class="chat-messages" id="messages"></div>
   <div class="chat-input">
@@ -122,8 +159,7 @@ button{cursor:pointer}
 <div id="admin-screen">
   <div class="admin-header">
     <h2>⚙️ Painel Administrativo — Val</h2>
-    <span id="admin-user-label"></span>
-    <button class="logout-btn" onclick="logout()">Sair</button>
+    <button class="header-btn" onclick="logout()">Sair</button>
   </div>
   <div class="admin-tabs">
     <button class="tab-btn active" onclick="openTab('hist')">💬 Histórico</button>
@@ -211,20 +247,64 @@ const DEFAULT_CONFIG = {
 let currentUser = null;
 let conversationHistory = [];
 
-document.getElementById('login-btn').addEventListener('click', doLogin);
-document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+// ── SENHA ────────────────────────────────────────────────────
+async function getUserPassword(u){
+  try{
+    const r = await window.storage.get(`pwd_${u}`);
+    return r ? r.value : (USERS[u] || null);
+  }catch{ return USERS[u] || null; }
+}
 
-function doLogin(){
+function openSenhaModal(){
+  document.getElementById('senha-atual').value='';
+  document.getElementById('senha-nova').value='';
+  document.getElementById('senha-confirm').value='';
+  document.getElementById('senha-msg').textContent='';
+  document.getElementById('senha-msg').className='modal-msg';
+  document.getElementById('senha-modal').classList.add('open');
+}
+
+function closeSenhaModal(){
+  document.getElementById('senha-modal').classList.remove('open');
+}
+
+async function salvarSenha(){
+  const atual = document.getElementById('senha-atual').value.trim();
+  const nova = document.getElementById('senha-nova').value.trim();
+  const confirm = document.getElementById('senha-confirm').value.trim();
+  const msgEl = document.getElementById('senha-msg');
+
+  const senhaAtual = await getUserPassword(currentUser);
+  if(atual !== senhaAtual){ msgEl.textContent='Senha atual incorreta.'; msgEl.className='modal-msg err'; return; }
+  if(nova.length < 6){ msgEl.textContent='A nova senha deve ter pelo menos 6 caracteres.'; msgEl.className='modal-msg err'; return; }
+  if(nova !== confirm){ msgEl.textContent='As senhas não coincidem.'; msgEl.className='modal-msg err'; return; }
+
+  await window.storage.set(`pwd_${currentUser}`, nova);
+
+  // Registrar no histórico admin
+  const logKey = `hist_${currentUser}`;
+  let history = [];
+  try{ const r = await window.storage.get(logKey); if(r) history = JSON.parse(r.value); }catch{}
+  history.push({ ts: new Date().toISOString(), type: 'senha', user: '🔒 Usuário alterou a senha', val: 'Senha atualizada com sucesso.' });
+  await window.storage.set(logKey, JSON.stringify(history));
+
+  msgEl.textContent='✔ Senha alterada com sucesso!'; msgEl.className='modal-msg ok';
+  setTimeout(()=>closeSenhaModal(), 1500);
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('password').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
   const u = document.getElementById('username').value.trim().toLowerCase();
   const p = document.getElementById('password').value.trim();
   if(u===ADMIN.user && p===ADMIN.pass){
-    currentUser='admin';
-    show('admin-screen');
-    loadAdminData();
-  } else if(USERS[u] && USERS[u]===p){
-    currentUser=u;
-    show('chat-screen');
-    startChat();
+    currentUser='admin'; show('admin-screen'); loadAdminData();
+  } else if(USERS[u] !== undefined){
+    const pwd = await getUserPassword(u);
+    if(p === pwd){ currentUser=u; show('chat-screen'); startChat(); }
+    else { document.getElementById('login-error').style.display='block'; }
   } else {
     document.getElementById('login-error').style.display='block';
   }
@@ -240,30 +320,22 @@ function logout(){
 }
 
 function show(id){ document.getElementById(id).style.display='flex'; }
-function hideAll(){
-  ['login-screen','chat-screen','admin-screen'].forEach(id=>{
-    document.getElementById(id).style.display='none';
-  });
-}
+function hideAll(){ ['login-screen','chat-screen','admin-screen'].forEach(id=>{ document.getElementById(id).style.display='none'; }); }
 
+// ── CHAT ─────────────────────────────────────────────────────
 async function startChat(){
   const cfg = await getConfig();
   try{
     const r = await window.storage.get(`hist_${currentUser}`);
     if(r){
       const hist = JSON.parse(r.value);
-      if(hist.length > 0){
-        hist.forEach(m=>{
-          addMessage('user', m.user);
-          addMessage('val', m.val);
-          conversationHistory.push({role:'user', content:m.user});
-          conversationHistory.push({role:'assistant', content:m.val});
-        });
+      const chatHist = hist.filter(m => m.type !== 'senha');
+      if(chatHist.length > 0){
+        chatHist.forEach(m=>{ addMessage('user',m.user); addMessage('val',m.val); conversationHistory.push({role:'user',content:m.user}); conversationHistory.push({role:'assistant',content:m.val}); });
         const typing = addMessage('val','Val está digitando...',true);
         try{
-          const reply = await callVal([...conversationHistory, {role:'user', content:'[O usuário retornou. Cumprimente-o brevemente pelo retorno de forma calorosa e formal.]'}]);
-          typing.remove(); addMessage('val', reply);
-          conversationHistory.push({role:'assistant', content:reply});
+          const reply = await callVal([...conversationHistory, {role:'user',content:'[O usuário retornou. Cumprimente-o brevemente pelo retorno de forma calorosa e formal.]'}]);
+          typing.remove(); addMessage('val',reply); conversationHistory.push({role:'assistant',content:reply});
         }catch{ typing.remove(); addMessage('val','Bem-vindo(a) de volta! Como posso ajudá-lo(a) hoje?'); }
         return;
       }
@@ -282,16 +354,11 @@ function addMessage(from, text, isTyping=false){
   return div;
 }
 
-// ── CHAMADA À API — via rota segura da Vercel ──
 async function callVal(messages){
   const [cfg, kb] = await Promise.all([getConfig(), getKbContent()]);
   const kbSection = kb.length ? `\n\n## BASE DE CONHECIMENTO:\n${kb.map(k=>`### ${k.title}\n${k.content}`).join('\n\n')}` : '';
   const system = `${cfg.personality}\n\n${cfg.topics}\n\n${cfg.rules}${kbSection}`;
-  const res = await fetch('/api/chat', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ system, messages })
-  });
+  const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ system, messages }) });
   if(!res.ok) throw new Error('Erro na API');
   const data = await res.json();
   return data.reply;
@@ -308,33 +375,28 @@ async function sendMessage(){
   const typing=addMessage('val','Val está digitando...',true);
   try{
     const reply = await callVal(conversationHistory);
-    typing.remove();
-    addMessage('val',reply);
+    typing.remove(); addMessage('val',reply);
     conversationHistory.push({role:'assistant',content:reply});
     await saveHistory(text, reply);
-  }catch{
-    typing.remove();
-    addMessage('val','Desculpe, ocorreu um erro de conexão. Por favor, tente novamente.');
-  }
+  }catch{ typing.remove(); addMessage('val','Desculpe, ocorreu um erro de conexão. Por favor, tente novamente.'); }
   document.getElementById('send-btn').disabled=false;
   input.focus();
 }
 
-document.getElementById('msg-input').addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
-});
+document.getElementById('msg-input').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
 
+// ── STORAGE ──────────────────────────────────────────────────
 async function getConfig(){
-  try{const r=await window.storage.get('val_config');return r?JSON.parse(r.value):DEFAULT_CONFIG;}
-  catch{return DEFAULT_CONFIG;}
+  try{ const r=await window.storage.get('val_config'); return r?JSON.parse(r.value):DEFAULT_CONFIG; }
+  catch{ return DEFAULT_CONFIG; }
 }
 
 async function saveHistory(userMsg, valMsg){
   const key=`hist_${currentUser}`;
   let history=[];
-  try{const r=await window.storage.get(key);if(r)history=JSON.parse(r.value);}catch{}
-  history.push({ts:new Date().toISOString(),user:userMsg,val:valMsg});
-  try{await window.storage.set(key,JSON.stringify(history));}catch(e){console.error(e);}
+  try{ const r=await window.storage.get(key); if(r) history=JSON.parse(r.value); }catch{}
+  history.push({ts:new Date().toISOString(), type:'chat', user:userMsg, val:valMsg});
+  try{ await window.storage.set(key,JSON.stringify(history)); }catch(e){ console.error(e); }
 }
 
 async function getKbContent(){
@@ -342,13 +404,14 @@ async function getKbContent(){
     const r=await window.storage.list('kb_');
     if(!r||!r.keys||r.keys.length===0) return [];
     const items=[];
-    for(const k of r.keys){try{const d=await window.storage.get(k);if(d)items.push(JSON.parse(d.value));}catch{}}
+    for(const k of r.keys){ try{ const d=await window.storage.get(k); if(d) items.push(JSON.parse(d.value)); }catch{} }
     return items;
-  }catch{return [];}
+  }catch{ return []; }
 }
 
+// ── ADMIN ────────────────────────────────────────────────────
 function openTab(t){
-  ['hist','config','kb'].forEach(id=>{document.getElementById(`tab-${id}`).style.display=id===t?'block':'none';});
+  ['hist','config','kb'].forEach(id=>{ document.getElementById(`tab-${id}`).style.display=id===t?'block':'none'; });
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['hist','config','kb'][i]===t));
   if(t==='hist') loadHistList();
   if(t==='config') loadConfigForm();
@@ -363,53 +426,55 @@ async function loadHistList(){
   document.getElementById('hist-conv').classList.remove('open');
   try{
     const r=await window.storage.list('hist_');
-    if(!r||!r.keys||r.keys.length===0){el.innerHTML='<div class="empty-state">Nenhuma conversa registrada ainda.</div>';return;}
+    if(!r||!r.keys||r.keys.length===0){ el.innerHTML='<div class="empty-state">Nenhuma conversa registrada ainda.</div>'; return; }
     el.innerHTML='';
     for(const k of r.keys){
       try{
-        const d=await window.storage.get(k);if(!d)continue;
+        const d=await window.storage.get(k); if(!d) continue;
         const hist=JSON.parse(d.value);
         const uname=k.replace('hist_','');
         const last=hist[hist.length-1];
         const dt=last?new Date(last.ts).toLocaleString('pt-BR'):'';
+        const senhaAlterada=hist.some(m=>m.type==='senha');
+        const chatCount=hist.filter(m=>m.type==='chat').length;
         const card=document.createElement('div');
         card.className='user-card';
-        card.innerHTML=`<div><div class="uname">👤 ${uname}</div><div class="umeta">${hist.length} mensagem(ns) • Última: ${dt}</div></div>
-          <div style="display:flex;gap:8px">
-            <button class="btn-sm btn-outline" onclick="viewConv('${k}','${uname}')">Ver conversa</button>
-            <button class="btn-sm btn-danger" onclick="deleteConv('${k}')">Apagar</button>
-          </div>`;
+        card.innerHTML=`<div>
+          <div class="uname">👤 ${uname}${senhaAlterada?'<span class="badge-senha">🔒 senha alterada</span>':''}</div>
+          <div class="umeta">${chatCount} mensagem(ns) • Última: ${dt}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm btn-outline" onclick="viewConv('${k}','${uname}')">Ver</button>
+          <button class="btn-sm btn-danger" onclick="deleteConv('${k}')">Apagar</button>
+        </div>`;
         el.appendChild(card);
       }catch{}
     }
-  }catch{el.innerHTML='<div class="empty-state">Erro ao carregar histórico.</div>';}
+  }catch{ el.innerHTML='<div class="empty-state">Erro ao carregar histórico.</div>'; }
 }
 
-async function viewConv(key,uname){
+async function viewConv(key, uname){
   document.getElementById('hist-list').style.display='none';
   document.getElementById('hist-conv').classList.add('open');
   const content=document.getElementById('conv-content');
   try{
     const d=await window.storage.get(key);
     const hist=JSON.parse(d.value);
-    content.innerHTML=`<h3 style="color:#7a3f3f;margin-bottom:4px">Conversa de ${uname}</h3><div class="conv-meta">${hist.length} trocas registradas</div>`;
+    content.innerHTML=`<h3 style="color:#7a3f3f;margin-bottom:4px">Conversa de ${uname}</h3><div class="conv-meta">${hist.length} registros</div>`;
     hist.forEach(m=>{
       const dt=new Date(m.ts).toLocaleString('pt-BR');
-      content.innerHTML+=`<div class="conv-msg user"><div class="who">👤 ${uname} — ${dt}</div>${m.user}</div>
-        <div class="conv-msg val"><div class="who">🌸 Val</div>${m.val}</div>`;
+      if(m.type==='senha'){
+        content.innerHTML+=`<div class="conv-msg system"><div class="who">🔒 Sistema — ${dt}</div>Usuário alterou a senha.</div>`;
+      } else {
+        content.innerHTML+=`<div class="conv-msg user"><div class="who">👤 ${uname} — ${dt}</div>${m.user}</div>
+          <div class="conv-msg val"><div class="who">🌸 Val</div>${m.val}</div>`;
+      }
     });
-  }catch{content.innerHTML='<p style="color:#ccc">Erro ao carregar conversa.</p>';}
+  }catch{ content.innerHTML='<p style="color:#ccc">Erro ao carregar conversa.</p>'; }
 }
 
-function closeConv(){
-  document.getElementById('hist-list').style.display='block';
-  document.getElementById('hist-conv').classList.remove('open');
-}
-
-async function deleteConv(key){
-  if(!confirm('Apagar todo o histórico deste usuário?')) return;
-  await window.storage.delete(key); loadHistList();
-}
+function closeConv(){ document.getElementById('hist-list').style.display='block'; document.getElementById('hist-conv').classList.remove('open'); }
+async function deleteConv(key){ if(!confirm('Apagar todo o histórico deste usuário?')) return; await window.storage.delete(key); loadHistList(); }
 
 async function loadConfigForm(){
   const cfg=await getConfig();
@@ -420,74 +485,46 @@ async function loadConfigForm(){
 }
 
 async function saveConfig(){
-  const cfg={
-    personality:document.getElementById('cfg-personality').value,
-    topics:document.getElementById('cfg-topics').value,
-    rules:document.getElementById('cfg-rules').value,
-    welcome:document.getElementById('cfg-welcome').value
-  };
+  const cfg={ personality:document.getElementById('cfg-personality').value, topics:document.getElementById('cfg-topics').value, rules:document.getElementById('cfg-rules').value, welcome:document.getElementById('cfg-welcome').value };
   await window.storage.set('val_config',JSON.stringify(cfg));
-  const ok=document.getElementById('save-ok');
-  ok.style.display='flex'; setTimeout(()=>ok.style.display='none',2500);
+  const ok=document.getElementById('save-ok'); ok.style.display='flex'; setTimeout(()=>ok.style.display='none',2500);
 }
 
-async function resetConfig(){
-  if(!confirm('Restaurar configurações padrão?')) return;
-  await window.storage.set('val_config',JSON.stringify(DEFAULT_CONFIG));
-  loadConfigForm();
-}
+async function resetConfig(){ if(!confirm('Restaurar configurações padrão?')) return; await window.storage.set('val_config',JSON.stringify(DEFAULT_CONFIG)); loadConfigForm(); }
 
-function switchKbTab(t){
-  document.getElementById('kb-file-area').style.display=t==='file'?'block':'none';
-  document.getElementById('kb-text-area').style.display=t==='text'?'block':'none';
-  document.querySelectorAll('.tab-kb').forEach((b,i)=>b.classList.toggle('active',['file','text'][i]===t));
-}
+function switchKbTab(t){ document.getElementById('kb-file-area').style.display=t==='file'?'block':'none'; document.getElementById('kb-text-area').style.display=t==='text'?'block':'none'; document.querySelectorAll('.tab-kb').forEach((b,i)=>b.classList.toggle('active',['file','text'][i]===t)); }
 
 async function loadKbList(){
   const el=document.getElementById('kb-list');
   const items=await getKbContent();
-  if(items.length===0){el.innerHTML='<div class="empty-state">Nenhum conteúdo cadastrado ainda.</div>';return;}
+  if(items.length===0){ el.innerHTML='<div class="empty-state">Nenhum conteúdo cadastrado ainda.</div>'; return; }
   el.innerHTML='';
-  items.forEach(item=>{
-    const d=document.createElement('div');
-    d.className='kb-item';
-    d.innerHTML=`<div class="kb-info">
-      <div class="kb-title">${item.title}</div>
-      <div class="kb-meta">${item.type||'Texto'} • ${new Date(item.ts).toLocaleDateString('pt-BR')}</div>
-      <div class="kb-preview">${item.content}</div>
-    </div><button class="btn-sm btn-danger" onclick="deleteKb('${item.id}')">Apagar</button>`;
-    el.appendChild(d);
-  });
+  items.forEach(item=>{ const d=document.createElement('div'); d.className='kb-item'; d.innerHTML=`<div class="kb-info"><div class="kb-title">${item.title}</div><div class="kb-meta">${item.type||'Texto'} • ${new Date(item.ts).toLocaleDateString('pt-BR')}</div><div class="kb-preview">${item.content}</div></div><button class="btn-sm btn-danger" onclick="deleteKb('${item.id}')">Apagar</button>`; el.appendChild(d); });
 }
 
 async function saveKbText(){
   const title=document.getElementById('kb-title').value.trim();
   const text=document.getElementById('kb-text').value.trim();
-  if(!title||!text){alert('Preencha o título e o conteúdo.');return;}
+  if(!title||!text){ alert('Preencha o título e o conteúdo.'); return; }
   const id=`kb_${Date.now()}`;
   await window.storage.set(id,JSON.stringify({id,title,content:text,type:'Texto',ts:new Date().toISOString()}));
-  document.getElementById('kb-title').value='';
-  document.getElementById('kb-text').value='';
-  const ok=document.getElementById('kb-ok');
-  ok.style.display='flex'; setTimeout(()=>ok.style.display='none',2000);
+  document.getElementById('kb-title').value=''; document.getElementById('kb-text').value='';
+  const ok=document.getElementById('kb-ok'); ok.style.display='flex'; setTimeout(()=>ok.style.display='none',2000);
   loadKbList();
 }
 
-async function deleteKb(id){
-  if(!confirm('Apagar este conteúdo?')) return;
-  await window.storage.delete(id); loadKbList();
-}
+async function deleteKb(id){ if(!confirm('Apagar este conteúdo?')) return; await window.storage.delete(id); loadKbList(); }
 
-function onDragOver(e){e.preventDefault();document.getElementById('drop-area').classList.add('over');}
-function onDragLeave(){document.getElementById('drop-area').classList.remove('over');}
-function onDrop(e){e.preventDefault();document.getElementById('drop-area').classList.remove('over');const f=e.dataTransfer.files[0];if(f)handleFile(f);}
+function onDragOver(e){ e.preventDefault(); document.getElementById('drop-area').classList.add('over'); }
+function onDragLeave(){ document.getElementById('drop-area').classList.remove('over'); }
+function onDrop(e){ e.preventDefault(); document.getElementById('drop-area').classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) handleFile(f); }
 
 async function handleFile(file){
   if(!file) return;
   const ext=file.name.split('.').pop().toLowerCase();
   let text='';
-  if(ext==='txt'){text=await file.text();}
-  else{text=`[Arquivo: ${file.name}]\nPara PDF/DOC, copie e cole o conteúdo na aba "Colar Texto".`;}
+  if(ext==='txt'){ text=await file.text(); }
+  else{ text=`[Arquivo: ${file.name}]\nPara PDF/DOC, copie e cole o conteúdo na aba "Colar Texto".`; }
   const id=`kb_${Date.now()}`;
   const title=file.name.replace(/\.[^.]+$/,'');
   await window.storage.set(id,JSON.stringify({id,title,content:text,type:ext.toUpperCase(),ts:new Date().toISOString()}));
@@ -496,4 +533,5 @@ async function handleFile(file){
 }
 </script>
 </body>
+</html>
 </html>
