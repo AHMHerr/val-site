@@ -8,19 +8,23 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f5ede8;min-height:100vh;display:flex;align-items:center;justify-content:center}
 button{cursor:pointer}
-#login-screen{background:#fff;border-radius:20px;padding:40px 36px;width:360px;box-shadow:0 8px 32px rgba(180,100,100,.12);text-align:center}
+
+/* LOGIN */
+#login-screen{background:#fff;border-radius:20px;padding:40px 36px;width:360px;box-shadow:0 8px 32px rgba(180,100,100,.12);text-align:center;display:flex;flex-direction:column;align-items:center}
 .avatar{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#c97d7d,#e8b4b8);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:40px}
 #login-screen h1{color:#7a3f3f;font-size:1.5rem;margin-bottom:4px}
 #login-screen p{color:#999;font-size:.88rem;margin-bottom:28px}
-.field{text-align:left;margin-bottom:16px}
+.field{text-align:left;margin-bottom:16px;width:100%}
 .field label{font-size:.82rem;color:#7a3f3f;font-weight:600;display:block;margin-bottom:6px}
 .field input{width:100%;padding:10px 14px;border:1.5px solid #e8c8c8;border-radius:10px;font-size:.95rem;color:#333;outline:none;transition:border .2s}
 .field input:focus{border-color:#c97d7d}
 .btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#c97d7d,#d4a0a0);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:600;transition:opacity .2s}
 .btn-primary:hover{opacity:.88}
 #login-error{color:#c0392b;font-size:.84rem;margin-top:12px;display:none}
+
+/* CHAT */
 #chat-screen{display:none;flex-direction:column;width:100%;max-width:700px;height:100vh;max-height:700px;background:#fff;border-radius:20px;box-shadow:0 8px 32px rgba(180,100,100,.12);overflow:hidden}
-.chat-header{background:linear-gradient(135deg,#c97d7d,#e8b4b8);padding:16px 20px;display:flex;align-items:center;gap:14px}
+.chat-header{background:linear-gradient(135deg,#c97d7d,#e8b4b8);padding:16px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0}
 .chat-header .av{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
 .chat-header .info h2{color:#fff;font-size:1.1rem}
 .chat-header .info span{color:rgba(255,255,255,.85);font-size:.78rem}
@@ -37,12 +41,14 @@ button{cursor:pointer}
 .msg .name{font-size:.75rem;color:#aaa;padding:0 4px}
 .msg.user .name{text-align:right}
 .typing .bubble{color:#bbb;font-style:italic}
-.chat-input{padding:14px 16px;background:#fff;border-top:1px solid #f0e0e0;display:flex;gap:10px;align-items:center}
+.chat-input{padding:14px 16px;background:#fff;border-top:1px solid #f0e0e0;display:flex;gap:10px;align-items:center;flex-shrink:0}
 .chat-input textarea{flex:1;border:1.5px solid #e8c8c8;border-radius:12px;padding:10px 14px;font-size:.93rem;resize:none;outline:none;font-family:inherit;height:44px;line-height:1.4;transition:border .2s}
 .chat-input textarea:focus{border-color:#c97d7d}
 .send-btn{background:linear-gradient(135deg,#c97d7d,#d4a0a0);border:none;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .send-btn svg{fill:#fff;width:20px;height:20px}
 .send-btn:disabled{opacity:.5;cursor:default}
+
+/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:#fff;border-radius:20px;padding:32px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
@@ -53,10 +59,12 @@ button{cursor:pointer}
 .modal-msg{font-size:.84rem;margin-top:10px;text-align:center;min-height:18px}
 .modal-msg.ok{color:#27ae60}
 .modal-msg.err{color:#c0392b}
+
+/* ADMIN */
 #admin-screen{display:none;flex-direction:column;width:100%;max-width:900px;height:100vh;max-height:760px;background:#fff;border-radius:20px;box-shadow:0 8px 32px rgba(180,100,100,.12);overflow:hidden}
-.admin-header{background:linear-gradient(135deg,#7a3f3f,#c97d7d);padding:16px 24px;display:flex;align-items:center;gap:12px}
+.admin-header{background:linear-gradient(135deg,#7a3f3f,#c97d7d);padding:16px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0}
 .admin-header h2{color:#fff;font-size:1.1rem;flex:1}
-.admin-tabs{display:flex;background:#fdf6f3;border-bottom:2px solid #f0e0e0}
+.admin-tabs{display:flex;background:#fdf6f3;border-bottom:2px solid #f0e0e0;flex-shrink:0}
 .tab-btn{padding:12px 22px;border:none;background:none;font-size:.9rem;color:#999;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
 .tab-btn.active{color:#c97d7d;border-bottom-color:#c97d7d}
 .admin-body{flex:1;overflow-y:auto;padding:24px}
@@ -81,14 +89,14 @@ button{cursor:pointer}
 .config-section h3{color:#7a3f3f;font-size:.95rem;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #f0e0e0}
 .config-section textarea,.config-section input[type=text]{width:100%;padding:10px 14px;border:1.5px solid #e8c8c8;border-radius:10px;font-size:.9rem;font-family:inherit;outline:none;resize:vertical;transition:border .2s}
 .config-label{font-size:.82rem;color:#7a3f3f;font-weight:600;display:block;margin-bottom:6px;margin-top:12px}
-.btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center}
 .btn-save{background:linear-gradient(135deg,#c97d7d,#d4a0a0);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-weight:600;font-size:.9rem}
 .btn-reset{background:#fff;border:1.5px solid #aaa;color:#777;border-radius:10px;padding:10px 18px;font-weight:600;font-size:.9rem}
 .save-ok{color:#27ae60;font-size:.84rem;display:none;align-items:center;gap:4px}
 .kb-item{background:#fdf6f3;border:1px solid #f0e0e0;border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.kb-item .kb-info .kb-title{font-weight:600;color:#7a3f3f;font-size:.9rem}
-.kb-item .kb-info .kb-meta{font-size:.75rem;color:#aaa;margin-top:2px}
-.kb-item .kb-info .kb-preview{font-size:.82rem;color:#888;margin-top:4px;max-width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb-item .kb-title{font-weight:600;color:#7a3f3f;font-size:.9rem}
+.kb-item .kb-meta{font-size:.75rem;color:#aaa;margin-top:2px}
+.kb-item .kb-preview{font-size:.82rem;color:#888;margin-top:4px;max-width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .drop-area{border:2px dashed #e8c8c8;border-radius:12px;padding:28px;text-align:center;color:#bbb;font-size:.9rem;margin-bottom:16px;background:#fdf6f3}
 .tabs-kb{display:flex;gap:8px;margin-bottom:16px}
 .tab-kb{padding:8px 16px;border-radius:20px;border:1.5px solid #e8c8c8;background:#fff;color:#999;font-size:.85rem;font-weight:600;transition:all .2s}
@@ -145,11 +153,11 @@ button{cursor:pointer}
 <div id="admin-screen">
   <div class="admin-header">
     <h2>⚙️ Painel Administrativo — Val</h2>
-    <button class="header-btn" onclick="logout()">Sair</button>
+    <button class="header-btn" style="background:rgba(255,255,255,.25);border:none;color:#fff;padding:7px 14px;border-radius:20px;font-size:.8rem" onclick="logout()">Sair</button>
   </div>
   <div class="admin-tabs">
     <button class="tab-btn active" onclick="openTab('hist')">💬 Histórico</button>
-    <button class="tab-btn" onclick="openTab('config')">🛠 Configurações da Val</button>
+    <button class="tab-btn" onclick="openTab('config')">🛠 Configurações</button>
     <button class="tab-btn" onclick="openTab('kb')">📚 Base de Conhecimento</button>
   </div>
   <div class="admin-body">
@@ -195,9 +203,8 @@ button{cursor:pointer}
       <div id="kb-file-area">
         <div class="drop-area" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
           <div style="font-size:2rem">📄</div>
-          <strong>Arraste um arquivo aqui</strong>
+          <strong>Arraste um arquivo TXT aqui</strong>
           <p>ou <label style="color:#c97d7d;cursor:pointer;text-decoration:underline">selecione do computador<input type="file" id="file-input" accept=".txt" style="display:none" onchange="handleFile(this.files[0])"/></label></p>
-          <p style="margin-top:4px;font-size:.75rem;color:#ccc">TXT (para PDF/DOC, use a aba Colar Texto)</p>
         </div>
       </div>
       <div id="kb-text-area">
@@ -228,202 +235,257 @@ const DEFAULT_CONFIG = {
 
 let currentUser = null, conversationHistory = [];
 
-// ── API ───────────────────────────────────────────────────────
 async function api(action, payload={}) {
   const r = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action, payload}) });
-  return r.json();
+  const d = await r.json();
+  return d;
+}
+
+// ── TELAS ─────────────────────────────────────────────────────
+function show(id) {
+  ['login-screen','chat-screen','admin-screen'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'flex' : 'none';
+  });
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function doLogin() {
+  const u = document.getElementById('username').value.trim().toLowerCase();
+  const p = document.getElementById('password').value.trim();
+  document.getElementById('login-error').style.display = 'none';
+  if(u === ADMIN.user && p === ADMIN.pass) {
+    currentUser = 'admin'; show('admin-screen'); loadAdminData();
+  } else if(USERS[u] !== undefined) {
+    const d = await api('getPassword', {usuario: u});
+    const pwd = d.senha || USERS[u];
+    if(p === pwd) { currentUser = u; show('chat-screen'); startChat(); }
+    else { document.getElementById('login-error').style.display = 'block'; }
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function logout() {
+  currentUser = null; conversationHistory = [];
+  document.getElementById('messages').innerHTML = '';
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  show('login-screen');
 }
 
 // ── SENHA ─────────────────────────────────────────────────────
-async function getUserPassword(u) {
-  try { const d = await api('getPassword', {usuario:u}); return d.senha || USERS[u] || null; } catch { return USERS[u] || null; }
-}
-
 function openSenhaModal() {
-  ['senha-atual','senha-nova','senha-confirm'].forEach(id=>document.getElementById(id).value='');
-  const m=document.getElementById('senha-msg'); m.textContent=''; m.className='modal-msg';
+  ['senha-atual','senha-nova','senha-confirm'].forEach(id => document.getElementById(id).value = '');
+  const m = document.getElementById('senha-msg'); m.textContent = ''; m.className = 'modal-msg';
   document.getElementById('senha-modal').classList.add('open');
 }
 function closeSenhaModal() { document.getElementById('senha-modal').classList.remove('open'); }
 
 async function salvarSenha() {
-  const atual=document.getElementById('senha-atual').value.trim();
-  const nova=document.getElementById('senha-nova').value.trim();
-  const confirm=document.getElementById('senha-confirm').value.trim();
-  const msgEl=document.getElementById('senha-msg');
-  const senhaAtual=await getUserPassword(currentUser);
-  if(atual!==senhaAtual){msgEl.textContent='Senha atual incorreta.';msgEl.className='modal-msg err';return;}
-  if(nova.length<6){msgEl.textContent='Mínimo 6 caracteres.';msgEl.className='modal-msg err';return;}
-  if(nova!==confirm){msgEl.textContent='As senhas não coincidem.';msgEl.className='modal-msg err';return;}
-  await api('savePassword',{usuario:currentUser,senha:nova});
-  await api('saveHistory',{usuario:currentUser,tipo:'senha',mensagem_user:'🔒 Usuário alterou a senha',mensagem_val:'Senha atualizada com sucesso.'});
-  msgEl.textContent='✔ Senha alterada com sucesso!';msgEl.className='modal-msg ok';
-  setTimeout(()=>closeSenhaModal(),1500);
+  const atual = document.getElementById('senha-atual').value.trim();
+  const nova = document.getElementById('senha-nova').value.trim();
+  const confirm = document.getElementById('senha-confirm').value.trim();
+  const msgEl = document.getElementById('senha-msg');
+  const d = await api('getPassword', {usuario: currentUser});
+  const senhaAtual = d.senha || USERS[currentUser];
+  if(atual !== senhaAtual) { msgEl.textContent = 'Senha atual incorreta.'; msgEl.className = 'modal-msg err'; return; }
+  if(nova.length < 6) { msgEl.textContent = 'Mínimo 6 caracteres.'; msgEl.className = 'modal-msg err'; return; }
+  if(nova !== confirm) { msgEl.textContent = 'As senhas não coincidem.'; msgEl.className = 'modal-msg err'; return; }
+  await api('savePassword', {usuario: currentUser, senha: nova});
+  await api('saveHistory', {usuario: currentUser, tipo: 'senha', mensagem_user: '🔒 Usuário alterou a senha', mensagem_val: 'Senha atualizada.'});
+  msgEl.textContent = '✔ Senha alterada com sucesso!'; msgEl.className = 'modal-msg ok';
+  setTimeout(() => closeSenhaModal(), 1500);
 }
-
-// ── LOGIN ─────────────────────────────────────────────────────
-document.getElementById('login-btn').addEventListener('click', doLogin);
-document.getElementById('password').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
-
-async function doLogin() {
-  const u=document.getElementById('username').value.trim().toLowerCase();
-  const p=document.getElementById('password').value.trim();
-  if(u===ADMIN.user&&p===ADMIN.pass){currentUser='admin';show('admin-screen');loadAdminData();}
-  else if(USERS[u]!==undefined){
-    const pwd=await getUserPassword(u);
-    if(p===pwd){currentUser=u;show('chat-screen');startChat();}
-    else{document.getElementById('login-error').style.display='block';}
-  } else {document.getElementById('login-error').style.display='block';}
-}
-
-function logout(){currentUser=null;conversationHistory=[];document.getElementById('messages').innerHTML='';document.getElementById('username').value='';document.getElementById('password').value='';document.getElementById('login-error').style.display='none';hideAll();show('login-screen');}
-function show(id){document.getElementById(id).style.display='flex';}
-function hideAll(){['login-screen','chat-screen','admin-screen'].forEach(id=>document.getElementById(id).style.display='none');}
 
 // ── CHAT ──────────────────────────────────────────────────────
 async function startChat() {
   const cfg = await getConfig();
   try {
-    const hist = await api('getHistory',{usuario:currentUser});
-    const chatHist = hist.filter(m=>m.tipo==='chat');
-    if(chatHist.length>0){
-      chatHist.forEach(m=>{addMessage('user',m.mensagem_user);addMessage('val',m.mensagem_val);conversationHistory.push({role:'user',content:m.mensagem_user});conversationHistory.push({role:'assistant',content:m.mensagem_val});});
-      const typing=addMessage('val','Val está digitando...',true);
-      try{const d=await api('chat',{system:buildSystem(cfg,await getKb()),messages:[...conversationHistory,{role:'user',content:'[O usuário retornou. Cumprimente-o brevemente de forma calorosa e formal.]'}]});typing.remove();addMessage('val',d.reply);conversationHistory.push({role:'assistant',content:d.reply});}
-      catch{typing.remove();addMessage('val','Bem-vindo(a) de volta! Como posso ajudá-lo(a) hoje?');}
+    const hist = await api('getHistory', {usuario: currentUser});
+    const chatHist = Array.isArray(hist) ? hist.filter(m => m.tipo === 'chat') : [];
+    if(chatHist.length > 0) {
+      chatHist.forEach(m => {
+        addMessage('user', m.mensagem_user);
+        addMessage('val', m.mensagem_val);
+        conversationHistory.push({role:'user', content: m.mensagem_user});
+        conversationHistory.push({role:'assistant', content: m.mensagem_val});
+      });
+      const typing = addMessage('val', 'Val está digitando...', true);
+      try {
+        const kb = await getKb();
+        const d = await api('chat', {system: buildSystem(cfg, kb), messages: [...conversationHistory, {role:'user', content:'[O usuário retornou. Cumprimente-o brevemente de forma calorosa e formal.]'}]});
+        typing.remove(); addMessage('val', d.reply || 'Bem-vindo(a) de volta!');
+        conversationHistory.push({role:'assistant', content: d.reply || ''});
+      } catch { typing.remove(); addMessage('val', 'Bem-vindo(a) de volta! Como posso ajudá-lo(a) hoje?'); }
       return;
     }
-  }catch{}
-  addMessage('val',cfg.welcome||DEFAULT_CONFIG.welcome);
+  } catch {}
+  addMessage('val', cfg.welcome || DEFAULT_CONFIG.welcome);
 }
 
-function buildSystem(cfg,kb){
-  const kbSection=kb.length?`\n\n## BASE DE CONHECIMENTO:\n${kb.map(k=>`### ${k.titulo}\n${k.conteudo}`).join('\n\n')}`:'';
+function buildSystem(cfg, kb) {
+  const kbSection = kb.length ? `\n\n## BASE DE CONHECIMENTO:\n${kb.map(k=>`### ${k.titulo}\n${k.conteudo}`).join('\n\n')}` : '';
   return `${cfg.personality||DEFAULT_CONFIG.personality}\n\n${cfg.topics||DEFAULT_CONFIG.topics}\n\n${cfg.rules||DEFAULT_CONFIG.rules}${kbSection}`;
 }
 
-function addMessage(from,text,isTyping=false){
-  const msgs=document.getElementById('messages');
-  const div=document.createElement('div');
-  div.className=`msg ${from}${isTyping?' typing':''}`;
-  div.innerHTML=`<span class="name">${from==='val'?'Val':currentUser}</span><div class="bubble">${text}</div>`;
-  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;return div;
+function addMessage(from, text, isTyping=false) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${from}${isTyping?' typing':''}`;
+  div.innerHTML = `<span class="name">${from==='val'?'Val':currentUser}</span><div class="bubble">${text}</div>`;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight; return div;
 }
 
-async function sendMessage(){
-  const input=document.getElementById('msg-input');
-  const text=input.value.trim();if(!text)return;
-  input.value='';document.getElementById('send-btn').disabled=true;
-  addMessage('user',text);conversationHistory.push({role:'user',content:text});
-  const typing=addMessage('val','Val está digitando...',true);
-  try{
-    const [cfg,kb]=await Promise.all([getConfig(),getKb()]);
-    const d=await api('chat',{system:buildSystem(cfg,kb),messages:conversationHistory});
-    typing.remove();addMessage('val',d.reply);conversationHistory.push({role:'assistant',content:d.reply});
-    await api('saveHistory',{usuario:currentUser,tipo:'chat',mensagem_user:text,mensagem_val:d.reply});
-  }catch{typing.remove();addMessage('val','Desculpe, ocorreu um erro. Por favor, tente novamente.');}
-  document.getElementById('send-btn').disabled=false;input.focus();
+async function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim(); if(!text) return;
+  input.value = ''; document.getElementById('send-btn').disabled = true;
+  addMessage('user', text); conversationHistory.push({role:'user', content: text});
+  const typing = addMessage('val', 'Val está digitando...', true);
+  try {
+    const [cfg, kb] = await Promise.all([getConfig(), getKb()]);
+    const d = await api('chat', {system: buildSystem(cfg, kb), messages: conversationHistory});
+    const reply = d.reply || 'Desculpe, não consegui processar sua mensagem.';
+    typing.remove(); addMessage('val', reply);
+    conversationHistory.push({role:'assistant', content: reply});
+    await api('saveHistory', {usuario: currentUser, tipo:'chat', mensagem_user: text, mensagem_val: reply});
+  } catch { typing.remove(); addMessage('val', 'Desculpe, ocorreu um erro. Por favor, tente novamente.'); }
+  document.getElementById('send-btn').disabled = false; input.focus();
 }
 
-document.getElementById('msg-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+document.getElementById('msg-input').addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
 
 // ── CONFIG ────────────────────────────────────────────────────
-async function getConfig(){try{const d=await api('getConfig');return d.personality?d:DEFAULT_CONFIG;}catch{return DEFAULT_CONFIG;}}
-async function getKb(){try{return await api('getKb')||[];}catch{return [];}}
-
-async function loadConfigForm(){const cfg=await getConfig();document.getElementById('cfg-personality').value=cfg.personality||'';document.getElementById('cfg-topics').value=cfg.topics||'';document.getElementById('cfg-rules').value=cfg.rules||'';document.getElementById('cfg-welcome').value=cfg.welcome||'';}
-
-async function saveConfig(){
-  const cfg={personality:document.getElementById('cfg-personality').value,topics:document.getElementById('cfg-topics').value,rules:document.getElementById('cfg-rules').value,welcome:document.getElementById('cfg-welcome').value};
-  await api('saveConfig',cfg);
-  const ok=document.getElementById('save-ok');ok.style.display='flex';setTimeout(()=>ok.style.display='none',2500);
+async function getConfig() {
+  try { const d = await api('getConfig'); return d && d.personality ? d : DEFAULT_CONFIG; }
+  catch { return DEFAULT_CONFIG; }
 }
 
-async function resetConfig(){if(!confirm('Restaurar padrão?'))return;await api('saveConfig',DEFAULT_CONFIG);loadConfigForm();}
+async function getKb() {
+  try { const d = await api('getKb'); return Array.isArray(d) ? d : []; }
+  catch { return []; }
+}
+
+async function loadConfigForm() {
+  const cfg = await getConfig();
+  document.getElementById('cfg-personality').value = cfg.personality || '';
+  document.getElementById('cfg-topics').value = cfg.topics || '';
+  document.getElementById('cfg-rules').value = cfg.rules || '';
+  document.getElementById('cfg-welcome').value = cfg.welcome || '';
+}
+
+async function saveConfig() {
+  const cfg = {
+    personality: document.getElementById('cfg-personality').value,
+    topics: document.getElementById('cfg-topics').value,
+    rules: document.getElementById('cfg-rules').value,
+    welcome: document.getElementById('cfg-welcome').value
+  };
+  await api('saveConfig', cfg);
+  const ok = document.getElementById('save-ok'); ok.style.display = 'flex'; setTimeout(() => ok.style.display = 'none', 2500);
+}
+
+async function resetConfig() {
+  if(!confirm('Restaurar configurações padrão?')) return;
+  await api('saveConfig', DEFAULT_CONFIG); loadConfigForm();
+}
 
 // ── ADMIN HISTÓRICO ───────────────────────────────────────────
-function loadAdminData(){loadHistList();}
+function loadAdminData() { loadHistList(); }
 
-async function loadHistList(){
-  const el=document.getElementById('hist-list');
-  el.innerHTML='<p style="color:#ccc;text-align:center;padding:20px">Carregando...</p>';
+function openTab(t) {
+  ['hist','config','kb'].forEach(id => document.getElementById(`tab-${id}`).style.display = id===t ? 'block' : 'none');
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['hist','config','kb'][i]===t));
+  if(t==='hist') loadHistList();
+  if(t==='config') loadConfigForm();
+  if(t==='kb') loadKbList();
+}
+
+async function loadHistList() {
+  const el = document.getElementById('hist-list');
+  el.innerHTML = '<p style="color:#ccc;text-align:center;padding:20px">Carregando...</p>';
   document.getElementById('hist-conv').classList.remove('open');
-  try{
-    const hist=await api('getAllHistory');
-    if(!hist||hist.length===0){el.innerHTML='<div class="empty-state">Nenhuma conversa registrada ainda.</div>';return;}
-    const byUser={};
-    hist.forEach(m=>{if(!byUser[m.usuario])byUser[m.usuario]=[];byUser[m.usuario].push(m);});
-    el.innerHTML='';
-    Object.entries(byUser).forEach(([uname,msgs])=>{
-      const last=msgs[msgs.length-1];
-      const dt=new Date(last.created_at).toLocaleString('pt-BR');
-      const senhaAlterada=msgs.some(m=>m.tipo==='senha');
-      const chatCount=msgs.filter(m=>m.tipo==='chat').length;
-      const card=document.createElement('div');card.className='user-card';
-      card.innerHTML=`<div><div class="uname">👤 ${uname}${senhaAlterada?'<span class="badge-senha">🔒 senha alterada</span>':''}</div><div class="umeta">${chatCount} mensagem(ns) • Última: ${dt}</div></div>
+  try {
+    const hist = await api('getAllHistory');
+    if(!Array.isArray(hist) || hist.length === 0) { el.innerHTML = '<div class="empty-state">Nenhuma conversa registrada ainda.</div>'; return; }
+    const byUser = {};
+    hist.forEach(m => { if(!byUser[m.usuario]) byUser[m.usuario] = []; byUser[m.usuario].push(m); });
+    el.innerHTML = '';
+    Object.entries(byUser).forEach(([uname, msgs]) => {
+      const last = msgs[msgs.length-1];
+      const dt = new Date(last.created_at).toLocaleString('pt-BR');
+      const senhaAlterada = msgs.some(m => m.tipo === 'senha');
+      const chatCount = msgs.filter(m => m.tipo === 'chat').length;
+      const card = document.createElement('div'); card.className = 'user-card';
+      card.innerHTML = `<div><div class="uname">👤 ${uname}${senhaAlterada?'<span class="badge-senha">🔒 senha alterada</span>':''}</div><div class="umeta">${chatCount} mensagem(ns) • Última: ${dt}</div></div>
         <div style="display:flex;gap:8px"><button class="btn-sm btn-outline" onclick="viewConv('${uname}')">Ver</button><button class="btn-sm btn-danger" onclick="deleteConv('${uname}')">Apagar</button></div>`;
       el.appendChild(card);
     });
-  }catch{el.innerHTML='<div class="empty-state">Erro ao carregar histórico.</div>';}
+  } catch { el.innerHTML = '<div class="empty-state">Erro ao carregar histórico.</div>'; }
 }
 
-async function viewConv(uname){
-  document.getElementById('hist-list').style.display='none';
+async function viewConv(uname) {
+  document.getElementById('hist-list').style.display = 'none';
   document.getElementById('hist-conv').classList.add('open');
-  const content=document.getElementById('conv-content');
-  try{
-    const hist=await api('getHistory',{usuario:uname});
-    content.innerHTML=`<h3 style="color:#7a3f3f;margin-bottom:4px">Conversa de ${uname}</h3><div class="conv-meta">${hist.length} registros</div>`;
-    hist.forEach(m=>{
-      const dt=new Date(m.created_at).toLocaleString('pt-BR');
-      if(m.tipo==='senha'){content.innerHTML+=`<div class="conv-msg system"><div class="who">🔒 Sistema — ${dt}</div>Usuário alterou a senha.</div>`;}
-      else{content.innerHTML+=`<div class="conv-msg user"><div class="who">👤 ${uname} — ${dt}</div>${m.mensagem_user}</div><div class="conv-msg val"><div class="who">🌸 Val</div>${m.mensagem_val}</div>`;}
+  const content = document.getElementById('conv-content');
+  try {
+    const hist = await api('getHistory', {usuario: uname});
+    content.innerHTML = `<h3 style="color:#7a3f3f;margin-bottom:4px">Conversa de ${uname}</h3><div class="conv-meta">${hist.length} registros</div>`;
+    hist.forEach(m => {
+      const dt = new Date(m.created_at).toLocaleString('pt-BR');
+      if(m.tipo === 'senha') { content.innerHTML += `<div class="conv-msg system"><div class="who">🔒 Sistema — ${dt}</div>Usuário alterou a senha.</div>`; }
+      else { content.innerHTML += `<div class="conv-msg user"><div class="who">👤 ${uname} — ${dt}</div>${m.mensagem_user}</div><div class="conv-msg val"><div class="who">🌸 Val</div>${m.mensagem_val}</div>`; }
     });
-  }catch{content.innerHTML='<p style="color:#ccc">Erro.</p>';}
+  } catch { content.innerHTML = '<p style="color:#ccc">Erro ao carregar.</p>'; }
 }
 
-function closeConv(){document.getElementById('hist-list').style.display='block';document.getElementById('hist-conv').classList.remove('open');}
-async function deleteConv(uname){if(!confirm(`Apagar histórico de ${uname}?`))return;await api('deleteHistory',{usuario:uname});loadHistList();}
-
-function openTab(t){
-  ['hist','config','kb'].forEach(id=>document.getElementById(`tab-${id}`).style.display=id===t?'block':'none');
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['hist','config','kb'][i]===t));
-  if(t==='hist')loadHistList();if(t==='config')loadConfigForm();if(t==='kb')loadKbList();
-}
+function closeConv() { document.getElementById('hist-list').style.display = 'block'; document.getElementById('hist-conv').classList.remove('open'); }
+async function deleteConv(uname) { if(!confirm(`Apagar histórico de ${uname}?`)) return; await api('deleteHistory', {usuario: uname}); loadHistList(); }
 
 // ── BASE DE CONHECIMENTO ──────────────────────────────────────
-function switchKbTab(t){document.getElementById('kb-file-area').style.display=t==='file'?'block':'none';document.getElementById('kb-text-area').style.display=t==='text'?'block':'none';document.querySelectorAll('.tab-kb').forEach((b,i)=>b.classList.toggle('active',['file','text'][i]===t));}
-
-async function loadKbList(){
-  const el=document.getElementById('kb-list');
-  const items=await getKb();
-  if(!items||items.length===0){el.innerHTML='<div class="empty-state">Nenhum conteúdo cadastrado ainda.</div>';return;}
-  el.innerHTML='';
-  items.forEach(item=>{const d=document.createElement('div');d.className='kb-item';d.innerHTML=`<div class="kb-info"><div class="kb-title">${item.titulo}</div><div class="kb-meta">${item.tipo} • ${new Date(item.created_at).toLocaleDateString('pt-BR')}</div><div class="kb-preview">${item.conteudo}</div></div><button class="btn-sm btn-danger" onclick="deleteKb('${item.id}')">Apagar</button>`;el.appendChild(d);});
+function switchKbTab(t) {
+  document.getElementById('kb-file-area').style.display = t==='file' ? 'block' : 'none';
+  document.getElementById('kb-text-area').style.display = t==='text' ? 'block' : 'none';
+  document.querySelectorAll('.tab-kb').forEach((b,i) => b.classList.toggle('active', ['file','text'][i]===t));
 }
 
-async function saveKbText(){
-  const titulo=document.getElementById('kb-title').value.trim();
-  const conteudo=document.getElementById('kb-text').value.trim();
-  if(!titulo||!conteudo){alert('Preencha o título e o conteúdo.');return;}
-  await api('saveKb',{id:`kb_${Date.now()}`,titulo,conteudo,tipo:'Texto'});
-  document.getElementById('kb-title').value='';document.getElementById('kb-text').value='';
-  const ok=document.getElementById('kb-ok');ok.style.display='flex';setTimeout(()=>ok.style.display='none',2000);
+async function loadKbList() {
+  const el = document.getElementById('kb-list');
+  const items = await getKb();
+  if(!items || items.length === 0) { el.innerHTML = '<div class="empty-state">Nenhum conteúdo cadastrado ainda.</div>'; return; }
+  el.innerHTML = '';
+  items.forEach(item => {
+    const d = document.createElement('div'); d.className = 'kb-item';
+    d.innerHTML = `<div><div class="kb-title">${item.titulo}</div><div class="kb-meta">${item.tipo} • ${new Date(item.created_at).toLocaleDateString('pt-BR')}</div><div class="kb-preview">${item.conteudo}</div></div><button class="btn-sm btn-danger" onclick="deleteKb('${item.id}')">Apagar</button>`;
+    el.appendChild(d);
+  });
+}
+
+async function saveKbText() {
+  const titulo = document.getElementById('kb-title').value.trim();
+  const conteudo = document.getElementById('kb-text').value.trim();
+  if(!titulo || !conteudo) { alert('Preencha o título e o conteúdo.'); return; }
+  await api('saveKb', {id: `kb_${Date.now()}`, titulo, conteudo, tipo: 'Texto'});
+  document.getElementById('kb-title').value = ''; document.getElementById('kb-text').value = '';
+  const ok = document.getElementById('kb-ok'); ok.style.display = 'flex'; setTimeout(() => ok.style.display = 'none', 2000);
   loadKbList();
 }
 
-async function deleteKb(id){if(!confirm('Apagar?'))return;await api('deleteKb',{id});loadKbList();}
+async function deleteKb(id) { if(!confirm('Apagar?')) return; await api('deleteKb', {id}); loadKbList(); }
 
-function onDragOver(e){e.preventDefault();}
-function onDragLeave(){}
-function onDrop(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);}
+function onDragOver(e) { e.preventDefault(); }
+function onDragLeave() {}
+function onDrop(e) { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f) handleFile(f); }
 
-async function handleFile(file){
-  if(!file)return;
-  const text=await file.text();
-  const titulo=file.name.replace(/\.[^.]+$/,'');
-  await api('saveKb',{id:`kb_${Date.now()}`,titulo,conteudo:text,tipo:'TXT'});
-  alert(`✅ "${titulo}" salvo!`);loadKbList();
+async function handleFile(file) {
+  if(!file) return;
+  const text = await file.text();
+  const titulo = file.name.replace(/\.[^.]+$/, '');
+  await api('saveKb', {id: `kb_${Date.now()}`, titulo, conteudo: text, tipo: 'TXT'});
+  alert(`✅ "${titulo}" salvo!`); loadKbList();
 }
 </script>
 </body>
