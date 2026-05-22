@@ -114,8 +114,10 @@ module.exports = async (req, res) => {
         body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1000, system: system || '', messages })
       });
       const d = await r.json();
+      console.log('chat response:', JSON.stringify(d).substring(0, 200));
       if (!r.ok) return res.status(200).json({ error: JSON.stringify(d) });
-      return res.status(200).json({ reply: d.content?.map(i => i.text || '').join('') || '' });
+      const reply = d.content?.map(i => i.text || '').join('') || d.reply || '';
+      return res.status(200).json({ reply });
     }
 
     return res.status(400).json({ error: 'Ação desconhecida' });
