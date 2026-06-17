@@ -1333,7 +1333,7 @@ function buildSugPage(minhas) {
       <textarea class="field" id="sug-quiz-desc" rows="4" maxlength="600" placeholder="Descreva o tema, as perguntas que gostaria de ver, o tipo de resultado esperado, por que acha que seria útil…" oninput="document.getElementById('sc-quiz-d').textContent=this.value.length+'/600'"></textarea>
       <div class="sug-count"><span id="sc-quiz-d">0/600</span></div>
       <div style="display:flex;justify-content:flex-end;margin-top:1rem">
-        <button class="btn btn-primary" onclick="enviarSugestao('quiz')">Enviar sugestão →</button>
+        <button id="sug-btn-quiz" class="btn btn-primary" onclick="enviarSugestao('quiz')">Enviar sugestão →</button>
       </div>
     </div>
 
@@ -1351,7 +1351,7 @@ function buildSugPage(minhas) {
       <textarea class="field" id="sug-hist-desc" rows="3" maxlength="400" placeholder="Dinâmicas, emoções, situações específicas, fantasias que gostaria de ver exploradas…" oninput="document.getElementById('sc-hist-d').textContent=this.value.length+'/400'"></textarea>
       <div class="sug-count"><span id="sc-hist-d">0/400</span></div>
       <div style="display:flex;justify-content:flex-end;margin-top:1rem">
-        <button class="btn btn-primary" onclick="enviarSugestao('historia')">Enviar sugestão →</button>
+        <button id="sug-btn-historia" class="btn btn-primary" onclick="enviarSugestao('historia')">Enviar sugestão →</button>
       </div>
     </div>
 
@@ -1376,7 +1376,7 @@ function buildSugPage(minhas) {
       <textarea class="field" id="sug-mel-desc" rows="4" maxlength="600" placeholder="Descreva o problema que identificou ou a melhoria que imagina, e como isso tornaria o portal melhor para você…" oninput="document.getElementById('sc-mel-d').textContent=this.value.length+'/600'"></textarea>
       <div class="sug-count"><span id="sc-mel-d">0/600</span></div>
       <div style="display:flex;justify-content:flex-end;margin-top:1rem">
-        <button class="btn btn-primary" onclick="enviarSugestao('melhoria')">Enviar sugestão →</button>
+        <button id="sug-btn-melhoria" class="btn btn-primary" onclick="enviarSugestao('melhoria')">Enviar sugestão →</button>
       </div>
     </div>
 
@@ -1394,7 +1394,7 @@ function mudarSugTab(tipo) {
 }
 
 async function enviarSugestao(tipo) {
-  let titulo = '', descricao = '', extra = '';
+  let titulo = '', descricao = '';
 
   if (tipo === 'quiz') {
     titulo    = document.getElementById('sug-quiz-titulo')?.value.trim();
@@ -1411,24 +1411,27 @@ async function enviarSugestao(tipo) {
     if (cat) descricao = `Categoria: ${cat}\n\n${descricao}`;
   }
 
-  if (!titulo)              { toast('Informe um título para a sugestão.'); return; }
+  if (!titulo)                              { toast('Informe um título para a sugestão.'); return; }
   if (!descricao || descricao.length < 20) { toast('A descrição precisa ter ao menos 20 caracteres.'); return; }
 
-  const btn = event.target;
-  btn.disabled = true; btn.textContent = 'Enviando…';
+  // Identificar e desabilitar o botão pelo id do form ativo
+  const btnId = `sug-btn-${tipo}`;
+  const btn   = document.getElementById(btnId);
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
 
   const r = await api('saveSugestao', {
-    usuario: currentUser,
+    usuario:  currentUser,
     tipo,
     titulo,
     descricao,
     status: 'pendente'
   });
 
-  btn.disabled = false; btn.textContent = 'Enviar sugestão →';
+  if (btn) { btn.disabled = false; btn.textContent = 'Enviar sugestão →'; }
 
   if (r && (r.ok || !r.error)) {
     toast('✓ Sugestão enviada! Obrigada pela contribuição.');
+    sugTabAtivo = tipo; // manter na aba atual ao recarregar
     renderSugPage();
   } else {
     toast('Erro ao enviar. Tente novamente.'); console.error(r);
