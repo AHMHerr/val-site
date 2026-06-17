@@ -904,6 +904,8 @@ function getProfileEmoji(title){
 
 function startQuiz(){
   qCurrent=0;qAnswers=[];qSelected=null;qMultiSel=[];qOtherText='';qQ2Texts=[];qQ8Texts=[];
+  // Limpar mapa de seleções anteriores
+  Object.keys(qOptIdxMap).forEach(k=>delete qOptIdxMap[k]);
   renderQuestion();
 }
 
@@ -923,8 +925,12 @@ function renderQuestion(){
   const blocoIdx=BLOCOS.indexOf(q.bloco);
   const pct=Math.round((qCurrent/BASE_QUESTIONS.length)*100);
   const isMulti=q.type==='multi';
-  const canNext=isMulti?qMultiSel.length>0:qSelected!==null;
+
+  // canNext: para multi precisa ter seleção; para single verifica qOptIdxMap
+  const canNext=isMulti?qMultiSel.length>0:(qOptIdxMap[qCurrent]!==undefined);
   const subLabel=q.key==='q8'?'Marque tudo que já fizeram juntos':q.key==='q9'?'Selecione tudo que desperta pelo menos curiosidade':isMulti?'Selecione todas que se aplicam':null;
+
+  const storedIdx=qOptIdxMap[qCurrent];
 
   const optsHTML=isMulti?opts.map((opt,i)=>{
     const checked=qMultiSel.includes(i);
@@ -933,11 +939,13 @@ function renderQuestion(){
       <span>${opt.text}</span>
     </button>
     ${opt.hasInput&&checked?`<input class="quiz-other-input" placeholder="Descreva brevemente…" value="${qOtherText}" oninput="qOtherText=this.value">`:''}`;
-  }).join(''):opts.map((opt,i)=>`
-    <button class="opt-btn ${qSelected===opt.score&&qSelected!==null&&opt.score===qSelected&&opts.indexOf(opt)===qAnswers[qCurrent+1000]?'selected':''}" data-idx="${i}" onclick="selectOpt(${opt.score},${i})">
-      <div class="opt-check">${document.querySelector?'':''}</div>
+  }).join(''):opts.map((opt,i)=>{
+    const isSel=storedIdx===i;
+    return`<button class="opt-btn ${isSel?'selected':''}" data-idx="${i}" onclick="selectOpt(${opt.score},${i})">
+      <div class="opt-check">${isSel?'✓':''}</div>
       <span>${opt.text}</span>
-    </button>`).join('');
+    </button>`;
+  }).join('');
 
   document.getElementById('quizWrap').innerHTML=`
     <div class="quiz-progress">
@@ -958,14 +966,6 @@ function renderQuestion(){
         ${qCurrent+1===BASE_QUESTIONS.length?'Ver resultado 🌹':'Próxima →'}
       </button>
     </div>`;
-
-  // Re-render selected states for single
-  if(!isMulti){
-    document.querySelectorAll('.opt-btn').forEach((btn,i)=>{
-      const storedIdx=qAnswers[qCurrent+'_optIdx'];
-      if(storedIdx!==undefined&&i===storedIdx){btn.classList.add('selected');btn.querySelector('.opt-check').textContent='✓';}
-    });
-  }
 }
 
 // Track option index for re-render
@@ -998,17 +998,20 @@ function quizNext(){
     if(q.key==='q2')qQ2Texts=texts;
     if(q.key==='q8')qQ8Texts=texts;
   } else {
-    if(qSelected===null)return;
-    score=qSelected;
+    if(qSelected===null&&qOptIdxMap[qCurrent]===undefined)return;
+    score=qSelected!==null?qSelected:qAnswers[qCurrent]?.score??0;
   }
 
-  // Save full answer detail
+  // Texto da opção selecionada para perguntas únicas
+  const selectedIdx=qOptIdxMap[qCurrent];
+  const selectedText=(!q.type||q.type!=='multi')&&selectedIdx!==undefined?opts[selectedIdx]?.text||'':'';
+
   const answerDetail={
     qId:q.id,
     question:q.text,
     bloco:q.bloco,
     score,
-    selectedTexts:q.type==='multi'?qMultiSel.map(i=>opts[i].text):[opts.find((_,i)=>i===qOptIdxMap[qCurrent])?.text||''],
+    selectedTexts:q.type==='multi'?qMultiSel.map(i=>opts[i].text):[selectedText],
   };
   qAnswers[qCurrent]=answerDetail;
 
@@ -1030,7 +1033,9 @@ function quizBack(){
       qMultiSel=opts.reduce((acc,opt,i)=>{if(prev.selectedTexts.includes(opt.text))acc.push(i);return acc;},[]);
     } else {
       qSelected=prev.score;
-      qOptIdxMap[qCurrent]=prev.selectedTexts?opts?.indexOf(opts?.find(o=>o.text===prev.selectedTexts[0])):-1;
+      const opts=buildOptions(q);
+      const foundIdx=opts.findIndex(o=>o.text===prev.selectedTexts?.[0]);
+      if(foundIdx>=0)qOptIdxMap[qCurrent]=foundIdx;
     }
   }
   renderQuestion();
@@ -1328,7 +1333,7 @@ function buildSugPage(minhas) {
       <textarea class="field" id="sug-quiz-desc" rows="4" maxlength="600" placeholder="Descreva o tema, as perguntas que gostaria de ver, o tipo de resultado esperado, por que acha que seria útil…" oninput="document.getElementById('sc-quiz-d').textContent=this.value.length+'/600'"></textarea>
       <div class="sug-count"><span id="sc-quiz-d">0/600</span></div>
       <div style="display:flex;justify-content:flex-end;margin-top:1rem">
-        <button class="btn btn-primary" onclick="enviarSugestao('quiz')">Enviar sugestão →</button>
+        <button id="sug-btn-quiz" class="btn btn-primary" onclick="enviarSugestao('quiz')">Enviar sugestão →</button>
       </div>
     </div>
 
@@ -1346,7 +1351,7 @@ function buildSugPage(minhas) {
       <textarea class="field" id="sug-hist-desc" rows="3" maxlength="400" placeholder="Dinâmicas, emoções, situações específicas, fantasias que gostaria de ver exploradas…" oninput="document.getElementById('sc-hist-d').textContent=this.value.length+'/400'"></textarea>
       <div class="sug-count"><span id="sc-hist-d">0/400</span></div>
       <div style="display:flex;justify-content:flex-end;margin-top:1rem">
-        <button class="btn btn-primary" onclick="enviarSugestao('historia')">Enviar sugestão →</button>
+        <button id="sug-btn-historia" class="btn btn-primary" onclick="enviarSugestao('historia')">Enviar sugestão →</button>
       </div>
     </div>
 
@@ -1371,7 +1376,7 @@ function buildSugPage(minhas) {
       <textarea class="field" id="sug-mel-desc" rows="4" maxlength="600" placeholder="Descreva o problema que identificou ou a melhoria que imagina, e como isso tornaria o portal melhor para você…" oninput="document.getElementById('sc-mel-d').textContent=this.value.length+'/600'"></textarea>
       <div class="sug-count"><span id="sc-mel-d">0/600</span></div>
       <div style="display:flex;justify-content:flex-end;margin-top:1rem">
-        <button class="btn btn-primary" onclick="enviarSugestao('melhoria')">Enviar sugestão →</button>
+        <button id="sug-btn-melhoria" class="btn btn-primary" onclick="enviarSugestao('melhoria')">Enviar sugestão →</button>
       </div>
     </div>
 
@@ -1389,7 +1394,7 @@ function mudarSugTab(tipo) {
 }
 
 async function enviarSugestao(tipo) {
-  let titulo = '', descricao = '', extra = '';
+  let titulo = '', descricao = '';
 
   if (tipo === 'quiz') {
     titulo    = document.getElementById('sug-quiz-titulo')?.value.trim();
@@ -1406,24 +1411,27 @@ async function enviarSugestao(tipo) {
     if (cat) descricao = `Categoria: ${cat}\n\n${descricao}`;
   }
 
-  if (!titulo)              { toast('Informe um título para a sugestão.'); return; }
+  if (!titulo)                              { toast('Informe um título para a sugestão.'); return; }
   if (!descricao || descricao.length < 20) { toast('A descrição precisa ter ao menos 20 caracteres.'); return; }
 
-  const btn = event.target;
-  btn.disabled = true; btn.textContent = 'Enviando…';
+  // Identificar e desabilitar o botão pelo id do form ativo
+  const btnId = `sug-btn-${tipo}`;
+  const btn   = document.getElementById(btnId);
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
 
   const r = await api('saveSugestao', {
-    usuario: currentUser,
+    usuario:  currentUser,
     tipo,
     titulo,
     descricao,
     status: 'pendente'
   });
 
-  btn.disabled = false; btn.textContent = 'Enviar sugestão →';
+  if (btn) { btn.disabled = false; btn.textContent = 'Enviar sugestão →'; }
 
   if (r && (r.ok || !r.error)) {
     toast('✓ Sugestão enviada! Obrigada pela contribuição.');
+    sugTabAtivo = tipo; // manter na aba atual ao recarregar
     renderSugPage();
   } else {
     toast('Erro ao enviar. Tente novamente.'); console.error(r);
