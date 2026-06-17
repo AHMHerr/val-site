@@ -1,288 +1,1803 @@
-const SUPABASE_URL = 'https://wphzopmzryzzwpuhdosi.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHpvcG16cnl6endwdWhkb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MDI5NDYsImV4cCI6MjA5NDk3ODk0Nn0.Uy3Yia4lgFKrCl2wHoQomu-_SvfA-iqdrEhCoMPzfwM';
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Val — Saúde & Relacionamentos</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --lav:#7C6FAF;--lav-l:#EDE9F6;--lav-m:#B8AEDD;
+  --sage:#6A9B8A;--sage-l:#E8F2EF;
+  --cream:#FAF8F5;--graphite:#2D2D2D;--muted:#7A7A8A;
+  --white:#fff;--border:#E4DFF5;--shadow:rgba(124,111,175,.12);
+  --nav-w:64px;
+}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--graphite);min-height:100vh;display:flex;flex-direction:column}
 
-const sb = (path, opts = {}) => {
-  const { headers: h = {}, ...rest } = opts;
-  return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...rest,
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
-      ...h
-    }
-  });
-};
+/* ── TOP HEADER ── */
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 1.25rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px var(--shadow)}
+.logo{display:flex;align-items:center;gap:.65rem}
+.logo-av{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid var(--lav-m);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1rem;color:white;font-weight:600;background:linear-gradient(135deg,var(--lav),var(--sage));animation:pulse-ring 3s ease-in-out infinite;flex-shrink:0}
+.logo-av img{width:100%;height:100%;object-fit:cover}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(124,111,175,.4)}50%{box-shadow:0 0 0 7px rgba(124,111,175,0)}}
+.logo-name{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--lav)}
+.logo-tag{font-size:.65rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.hdr-right{display:flex;align-items:center;gap:.5rem}
+.online-badge{display:flex;align-items:center;gap:.35rem;background:var(--sage-l);border-radius:20px;padding:.25rem .65rem;font-size:.68rem;color:var(--sage);font-weight:500}
+.dot{width:6px;height:6px;background:var(--sage);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-icon{width:34px;height:34px;border:none;background:var(--lav-l);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--lav);transition:all .2s;font-size:.9rem}
+.btn-icon:hover{background:var(--lav);color:white;transform:scale(1.05)}
+.btn-icon svg{width:16px;height:16px}
+
+/* ── BODY LAYOUT ── */
+.app-body{flex:1;display:flex;overflow:hidden}
+
+/* ── SIDE NAV ── */
+.side-nav{width:var(--nav-w);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:.75rem 0;gap:.4rem;position:sticky;top:58px;height:calc(100vh - 58px)}
+.nav-btn{width:46px;height:46px;border:none;background:transparent;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;color:var(--muted);transition:all .2s;position:relative}
+.nav-btn svg{width:20px;height:20px}
+.nav-btn span{font-size:.55rem;font-weight:500;letter-spacing:.04em}
+.nav-btn:hover{background:var(--lav-l);color:var(--lav)}
+.nav-btn.active{background:var(--lav-l);color:var(--lav)}
+.nav-btn.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:3px;background:var(--lav);border-radius:0 3px 3px 0}
+.nav-sep{width:32px;height:1px;background:var(--border);margin:.2rem 0}
+
+/* ── MAIN CONTENT ── */
+.page{flex:1;display:none;overflow-y:auto}
+.page.active{display:flex}
+
+/* ── CHAT PAGE ── */
+#page-chat{flex-direction:row;gap:0;max-width:100%}
+.sidebar{width:210px;flex-shrink:0;padding:1rem .85rem;display:flex;flex-direction:column;gap:.85rem;border-right:1px solid var(--border);background:var(--white)}
+.sb-card{background:var(--cream);border-radius:14px;padding:1rem;border:1px solid var(--border)}
+.sb-card h3{font-family:'Playfair Display',serif;font-size:.8rem;font-style:italic;color:var(--lav);margin-bottom:.7rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.topic-item{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;font-size:.76rem;color:var(--muted);border-bottom:1px solid #F0EDF8;cursor:pointer;transition:color .2s}
+.topic-item:last-child{border-bottom:none}
+.topic-item:hover{color:var(--lav)}
+.t-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.tip-box{background:linear-gradient(135deg,var(--lav-l),var(--sage-l));border-radius:11px;padding:.85rem;font-size:.72rem;color:var(--graphite);line-height:1.6;font-style:italic}
+.tip-box strong{display:block;font-style:normal;font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--lav);margin-bottom:.3rem}
+
+.chat-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.chat-top{padding:.85rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,var(--lav-l),var(--sage-l));flex-shrink:0}
+.chat-top-l{display:flex;align-items:center;gap:.65rem}
+.chat-av{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid var(--lav-m);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:.95rem;color:white;font-weight:600;background:linear-gradient(135deg,var(--lav),var(--sage));flex-shrink:0}
+.chat-av img{width:100%;height:100%;object-fit:cover}
+.chat-name-txt{font-weight:600;font-size:.88rem}
+.chat-role-txt{font-size:.68rem;color:var(--muted)}
+.messages{flex:1;overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:.8rem;scroll-behavior:smooth}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:var(--lav-m);border-radius:3px}
+.msg{display:flex;gap:.6rem;max-width:83%;animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.bubble{padding:.65rem .9rem;border-radius:14px;font-size:.845rem;line-height:1.65}
+.msg.bot .bubble{background:var(--lav-l);color:var(--graphite);border-bottom-left-radius:4px}
+.msg.user .bubble{background:var(--lav);color:white;border-bottom-right-radius:4px}
+.msg-av-sm{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;color:white;align-self:flex-end;overflow:hidden}
+.msg.bot .msg-av-sm{background:linear-gradient(135deg,var(--lav),var(--sage))}
+.msg.user .msg-av-sm{background:var(--lav-m)}
+.msg-av-sm img{width:100%;height:100%;object-fit:cover}
+.msg-time{font-size:.62rem;color:var(--muted);margin-top:.25rem}
+.msg.user .msg-time{text-align:right}
+.typing-indicator{display:flex;align-items:center;gap:.3rem;padding:.65rem .9rem;background:var(--lav-l);border-radius:14px;border-bottom-left-radius:4px}
+.td{width:6px;height:6px;border-radius:50%;background:var(--lav-m);animation:bounce 1.2s ease-in-out infinite}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+.input-area{padding:.85rem 1.1rem;border-top:1px solid var(--border);display:flex;gap:.6rem;align-items:flex-end;background:var(--cream);flex-shrink:0}
+.msg-input{flex:1;border:1.5px solid var(--border);border-radius:12px;padding:.6rem .85rem;font-family:'Inter',sans-serif;font-size:.845rem;color:var(--graphite);background:var(--white);resize:none;min-height:42px;max-height:100px;outline:none;transition:border-color .2s;overflow-y:auto}
+.msg-input:focus{border-color:var(--lav)}
+.msg-input::placeholder{color:var(--muted)}
+.send-btn{width:42px;height:42px;border-radius:12px;background:var(--lav);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;color:white}
+.send-btn:hover{background:#6A5F9E;transform:scale(1.05)}
+.send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.send-btn svg{width:18px;height:18px}
+
+/* ── QUIZ PAGE ── */
+#page-quiz{flex-direction:column;padding:1.5rem;align-items:center}
+
+/* ── INDICAÇÕES PAGE ── */
+#page-indicacoes{flex-direction:column;padding:1.5rem;align-items:center}
+.ind-wrap{width:100%;max-width:580px}
+.ind-header{text-align:center;margin-bottom:1.75rem}
+.ind-header h2{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:500;color:var(--lav);margin-bottom:.4rem}
+.ind-header p{font-size:.82rem;color:var(--muted);line-height:1.65}
+
+/* Requisitos bloqueio */
+.req-card{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:1.4rem;margin-bottom:1.25rem}
+.req-card h3{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1rem}
+.req-item{display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.83rem}
+.req-item:last-child{border-bottom:none}
+.req-item-label{color:var(--graphite)}
+.req-item-status{display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:500}
+.req-ok{color:var(--sage)}.req-fail{color:#DC2626}
+.req-bloqueio{background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:1rem 1.2rem;text-align:center;margin-bottom:1.25rem}
+.req-bloqueio strong{display:block;font-size:.9rem;color:#92400E;margin-bottom:.3rem}
+.req-bloqueio span{font-size:.78rem;color:#92400E}
+
+/* Formulário indicação */
+.ind-form{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:1.5rem;margin-bottom:1.25rem}
+.ind-form h3{font-family:'Playfair Display',serif;font-size:1rem;font-style:italic;color:var(--lav);margin-bottom:1.1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+.ind-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:500px){.ind-form-grid{grid-template-columns:1fr}}
+.field-group{display:flex;flex-direction:column;gap:.3rem}
+.field-group.full{grid-column:1/-1}
+.field-group label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.radio-group{display:flex;gap:.75rem;margin-top:.15rem}
+.radio-opt{display:flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--graphite);cursor:pointer}
+.radio-opt input{accent-color:var(--lav)}
+
+/* Histórico indicações usuária */
+.ind-hist-list{display:flex;flex-direction:column;gap:.5rem}
+.ind-hist-item{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:.9rem 1.1rem}
+.ind-hist-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.4rem}
+.ind-hist-nome{font-size:.88rem;font-weight:600;color:var(--graphite)}
+.ind-hist-date{font-size:.68rem;color:var(--muted)}
+.ind-hist-desc{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:.5rem}
+.ind-status{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:6px}
+.ind-status.pendente{background:#FEF3C7;color:#92400E}
+.ind-status.aprovada{background:#D1FAE5;color:#065F46}
+.ind-status.recusada{background:#FEE2E2;color:#DC2626}
+.ind-hist-motivo{font-size:.74rem;color:var(--muted);margin-top:.35rem;font-style:italic}
+
+/* Admin indicações */
+.adm-ind-item{background:var(--cream);border-radius:12px;padding:.9rem 1rem;margin-bottom:.5rem;border:1px solid var(--border)}
+.adm-ind-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.55rem}
+.adm-ind-indicante{font-size:.72rem;color:var(--muted);margin-bottom:.15rem}
+.adm-ind-nome{font-size:.9rem;font-weight:600;color:var(--graphite)}
+.adm-ind-info{display:grid;grid-template-columns:1fr 1fr;gap:.35rem .75rem;margin-bottom:.65rem}
+.adm-ind-field{font-size:.76rem;color:var(--muted)}.adm-ind-field strong{color:var(--graphite)}
+.adm-ind-desc{font-size:.78rem;color:var(--graphite);background:var(--white);border-radius:8px;padding:.55rem .7rem;border:1px solid var(--border);line-height:1.55;margin-bottom:.65rem}
+.adm-ind-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.adm-ind-motivo{flex:1;min-width:140px}
+
+/* ── SUGESTÕES PAGE ── */
+#page-sugestoes{flex-direction:column;padding:1.5rem;align-items:center}
+.sug-wrap{width:100%;max-width:580px}
+.sug-header{text-align:center;margin-bottom:1.75rem}
+.sug-header h2{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:500;color:var(--lav);margin-bottom:.4rem}
+.sug-header p{font-size:.82rem;color:var(--muted);line-height:1.65}
+.sug-tabs{display:flex;gap:.2rem;background:var(--lav-l);padding:.22rem;border-radius:13px;margin-bottom:1.4rem}
+.sug-tab{flex:1;padding:.6rem .4rem;border:none;background:transparent;border-radius:10px;font-size:.78rem;font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:.35rem}
+.sug-tab.active{background:var(--white);color:var(--lav);box-shadow:0 2px 7px var(--shadow)}
+.sug-form-card{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:1.5rem;margin-bottom:1.1rem}
+.sug-form-card h3{font-family:'Playfair Display',serif;font-size:.95rem;font-style:italic;color:var(--lav);margin-bottom:.3rem}
+.sug-form-card p{font-size:.78rem;color:var(--muted);line-height:1.55;margin-bottom:1.1rem;padding-bottom:.9rem;border-bottom:1px solid var(--border)}
+.sug-count{font-size:.68rem;color:var(--muted);text-align:right;margin-top:.25rem}
+.sug-sent{text-align:center;padding:2rem 1rem}
+.sug-sent-icon{font-size:2.5rem;margin-bottom:.75rem}
+.sug-sent h3{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--lav);margin-bottom:.4rem}
+.sug-sent p{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1.25rem}
+.sug-hist-section{margin-top:1.5rem}
+.sug-hist-title{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.65rem}
+.sug-hist-item{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:.85rem 1rem;margin-bottom:.45rem}
+.sug-hist-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.35rem}
+.sug-hist-tipo{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:.15rem .5rem;border-radius:5px}
+.tipo-quiz{background:#EDE9F6;color:#5a4f8a}
+.tipo-historia{background:#E8F2EF;color:#3d7a6a}
+.tipo-melhoria{background:#FEF3C7;color:#92400E}
+.sug-hist-date{font-size:.66rem;color:var(--muted)}
+.sug-hist-titulo{font-size:.84rem;font-weight:600;color:var(--graphite);margin-bottom:.25rem}
+.sug-hist-desc{font-size:.76rem;color:var(--muted);line-height:1.5}
+.sug-hist-status{margin-top:.5rem}
+.sug-status{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;font-weight:600;padding:.15rem .5rem;border-radius:5px}
+.sug-status.pendente{background:#FEF3C7;color:#92400E}
+.sug-status.em_analise{background:#DBEAFE;color:#1E40AF}
+.sug-status.implementada{background:#D1FAE5;color:#065F46}
+.sug-status.recusada{background:#FEE2E2;color:#DC2626}
+.sug-status-note{font-size:.73rem;color:var(--muted);font-style:italic;margin-top:.3rem}
+
+/* Admin sugestões */
+.adm-sug-filters{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.85rem}
+.adm-sug-item{background:var(--cream);border-radius:12px;padding:.9rem 1rem;margin-bottom:.5rem;border:1px solid var(--border)}
+.adm-sug-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem;gap:.5rem}
+.adm-sug-meta{font-size:.7rem;color:var(--muted);margin-bottom:.2rem}
+.adm-sug-titulo{font-size:.88rem;font-weight:600;color:var(--graphite)}
+.adm-sug-desc{font-size:.78rem;color:var(--graphite);background:var(--white);border-radius:8px;padding:.55rem .7rem;border:1px solid var(--border);line-height:1.55;margin-bottom:.65rem}
+.adm-sug-actions{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.adm-sug-note-input{flex:1;min-width:130px}
+
+/* Admin requisitos config */
+.req-config{background:var(--cream);border-radius:11px;padding:1rem;margin-bottom:1rem}
+.req-config-title{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--lav);margin-bottom:.75rem}
+.req-config-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem}
+.req-config-row:last-child{margin-bottom:0}
+.req-config-label{font-size:.82rem;color:var(--graphite)}
+.req-config-input{width:70px;border:1.5px solid var(--border);border-radius:8px;padding:.4rem .6rem;font-size:.82rem;text-align:center;outline:none;font-family:'Inter',sans-serif;color:var(--graphite);background:var(--white)}
+.req-config-input:focus{border-color:var(--lav)}
+.quiz-wrap{width:100%;max-width:620px}
+
+/* Quiz intro */
+.quiz-intro{text-align:center}
+.quiz-intro-icon{font-size:2.8rem;margin-bottom:.75rem}
+.quiz-intro h2{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:500;color:var(--lav);margin-bottom:.5rem}
+.quiz-intro p{font-size:.84rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem}
+.quiz-blocks{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;text-align:left}
+.quiz-block-item{display:flex;align-items:center;gap:.75rem;background:var(--white);border-radius:11px;padding:.75rem 1rem;border:1px solid var(--border)}
+.qbi-icon{font-size:1rem}
+.qbi-label{font-size:.8rem;font-weight:600;color:var(--graphite)}
+.qbi-desc{font-size:.72rem;color:var(--muted)}
+.quiz-cooldown{background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:1.25rem;text-align:center}
+.quiz-cooldown strong{display:block;font-size:.95rem;color:var(--lav);margin-bottom:.3rem}
+.quiz-cooldown span{font-size:.8rem;color:var(--muted)}
+
+/* Quiz history (user) */
+.quiz-hist-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;text-align:left}
+.quiz-hist-item{background:var(--white);border-radius:11px;padding:.8rem 1rem;border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.qhi-title{font-size:.84rem;font-weight:600;color:var(--graphite)}
+.qhi-meta{font-size:.7rem;color:var(--muted)}
+.qhi-badge{font-size:.65rem;background:var(--lav-l);color:var(--lav);padding:.15rem .5rem;border-radius:5px;font-weight:600}
+
+/* Quiz questions */
+.quiz-q{display:none}
+.quiz-q.active{display:block}
+.quiz-progress{margin-bottom:1.25rem}
+.quiz-progress-top{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-bottom:.5rem}
+.quiz-track{background:var(--border);border-radius:50px;height:4px;overflow:hidden;margin-bottom:.6rem}
+.quiz-fill{height:100%;background:linear-gradient(90deg,var(--lav),var(--sage));border-radius:50px;transition:width .35s}
+.quiz-bloco-dots{display:flex;gap:.35rem}
+.bloco-dot{flex:1;height:2px;border-radius:2px}
+.quiz-bloco-label{font-size:.66rem;color:var(--lav);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.6rem}
+.quiz-question{font-family:'Playfair Display',serif;font-size:1.08rem;font-weight:400;color:var(--graphite);line-height:1.6;margin-bottom:.35rem}
+.quiz-sub{font-size:.72rem;color:var(--muted);margin-bottom:1rem}
+.options-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.1rem}
+.opt-btn{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:11px;padding:.75rem 1rem;text-align:left;font-family:'Inter',sans-serif;font-size:.84rem;color:var(--muted);cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:.75rem;line-height:1.45}
+.opt-btn.selected{background:rgba(124,111,175,.08);border-color:var(--lav);color:var(--graphite)}
+.opt-btn:hover{border-color:var(--lav-m);color:var(--graphite)}
+.opt-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;transition:all .18s;color:white}
+.opt-btn.selected .opt-check{background:var(--lav);border-color:var(--lav)}
+.quiz-other-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:.55rem .8rem;font-family:'Inter',sans-serif;font-size:.82rem;outline:none;margin-top:.3rem;transition:border-color .2s;color:var(--graphite)}
+.quiz-other-input:focus{border-color:var(--lav)}
+.quiz-nav{display:flex;gap:.65rem;justify-content:space-between;align-items:center}
+.quiz-nav-info{font-size:.72rem;color:var(--muted)}
+
+/* Quiz result */
+.quiz-result{text-align:center}
+.result-emoji{font-size:3rem;margin-bottom:.75rem}
+.result-eyebrow{font-size:.66rem;color:var(--lav);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4rem}
+.result-title{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:500;color:var(--graphite);margin-bottom:.3rem}
+.result-pts{font-size:.76rem;color:var(--muted);margin-bottom:1.1rem}
+.result-bar-wrap{background:var(--border);border-radius:50px;height:6px;margin-bottom:.35rem;overflow:hidden}
+.result-bar-fill{height:100%;border-radius:50px;transition:width .8s}
+.result-bar-labels{display:flex;justify-content:space-between;font-size:.64rem;color:var(--muted);margin-bottom:1.25rem}
+.result-blocos{background:var(--cream);border-radius:14px;padding:1rem;margin-bottom:1rem;text-align:left}
+.result-blocos h4{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--lav);margin-bottom:.8rem}
+.rb-item{margin-bottom:.7rem}
+.rb-item:last-child{margin-bottom:0}
+.rb-label{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted);margin-bottom:.3rem}
+.rb-track{background:var(--border);border-radius:50px;height:3px;overflow:hidden}
+.rb-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--lav),var(--sage))}
+.result-desc{background:var(--white);border-radius:14px;padding:1rem;margin-bottom:.85rem;border:1px solid var(--border);font-size:.86rem;line-height:1.75;color:var(--graphite);text-align:left}
+.result-tip{background:var(--lav-l);border-radius:12px;padding:.9rem 1rem;margin-bottom:1.25rem;text-align:left}
+.result-tip strong{display:block;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--lav);margin-bottom:.35rem}
+.result-tip p{font-size:.82rem;color:var(--graphite);line-height:1.65}
+
+/* ── SHARED UI ── */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:10px;font-size:.82rem;font-weight:500;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all .2s}
+.btn-primary{background:var(--lav);color:white}.btn-primary:hover{background:#6A5F9E}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--muted)}.btn-outline:hover{border-color:var(--lav);color:var(--lav)}
+.btn-danger{background:#FEE2E2;color:#DC2626}.btn-danger:hover{background:#FECACA}
+.btn-sage{background:var(--sage);color:white}.btn-sage:hover{background:#5A8A79}
+.btn-sm{padding:.32rem .65rem;font-size:.74rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(45,45,45,.55);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:20px;padding:1.85rem;width:90%;max-width:640px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(45,45,45,.25);animation:slideUp .27s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--lav);margin-bottom:1.4rem;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.15rem;line-height:1;padding:.2rem;transition:color .2s}
+.modal-close:hover{color:var(--graphite)}
+label.fl{display:block;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.32rem;margin-top:.85rem}
+label.fl:first-child{margin-top:0}
+textarea.field,input.field{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .8rem;font-family:'Inter',sans-serif;font-size:.82rem;color:var(--graphite);background:var(--cream);outline:none;transition:border-color .2s;resize:vertical}
+textarea.field:focus,input.field:focus{border-color:var(--lav);background:white}
+textarea.field{min-height:76px}
+.modal-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.tab-nav{display:flex;gap:.18rem;background:var(--lav-l);padding:.2rem;border-radius:11px;margin-bottom:1.3rem;flex-wrap:wrap}
+.tab-btn{flex:1;min-width:80px;padding:.5rem .4rem;border:none;background:transparent;border-radius:9px;font-size:.73rem;font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s;font-family:'Inter',sans-serif}
+.tab-btn.active{background:var(--white);color:var(--lav);box-shadow:0 2px 7px var(--shadow)}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* KB */
+.kb-list{display:flex;flex-direction:column;gap:.4rem;margin-top:.65rem;max-height:220px;overflow-y:auto}
+.kb-item{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border-radius:9px;padding:.6rem .75rem;font-size:.76rem;gap:.7rem}
+.kb-item-text{flex:1;color:var(--graphite);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{font-size:.76rem;color:var(--muted);text-align:center;padding:1.25rem;font-style:italic}
+
+/* History */
+.hist-user{background:var(--cream);border-radius:10px;padding:.65rem .85rem;margin-bottom:.4rem}
+.hist-user-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.hist-user-name{font-size:.82rem;font-weight:500}
+.hist-user-meta{font-size:.68rem;color:var(--muted);margin-top:.12rem}
+.hist-badge{background:var(--lav-l);color:var(--lav);font-size:.62rem;padding:.12rem .4rem;border-radius:5px;font-weight:600;margin-left:.4rem}
+.hist-msgs{display:none;flex-direction:column;gap:.35rem;margin-top:.65rem}
+.hist-msgs.open{display:flex}
+.hist-msg-row{font-size:.74rem;padding:.4rem .6rem;border-radius:7px;line-height:1.5}
+.hist-msg-row.bot{background:var(--lav-l)}.hist-msg-row.user{background:#F0F0F7}.hist-msg-row.system{background:#FEF3C7;color:#92400E;font-style:italic}
+.hist-msg-date{font-size:.6rem;color:var(--muted);margin-top:.12rem}
+
+/* Admin Profiles tab */
+.profile-user-card{background:var(--cream);border-radius:12px;padding:.85rem 1rem;margin-bottom:.5rem;border:1px solid var(--border)}
+.profile-user-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.profile-user-name{font-size:.84rem;font-weight:600}
+.profile-result-badge{background:var(--lav-l);color:var(--lav);font-size:.7rem;padding:.18rem .55rem;border-radius:6px;font-weight:600}
+.profile-date{font-size:.68rem;color:var(--muted);margin-top:.12rem}
+.profile-detail{display:none;margin-top:.85rem}
+.profile-detail.open{display:block}
+.profile-score-bar{margin-bottom:.6rem}
+.psb-label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted);margin-bottom:.28rem}
+.psb-track{background:var(--border);border-radius:50px;height:3px;overflow:hidden}
+.psb-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--lav),var(--sage))}
+.profile-q-list{margin-top:.85rem;display:flex;flex-direction:column;gap:.4rem}
+.profile-q-item{background:var(--white);border-radius:9px;padding:.6rem .75rem;border:1px solid var(--border)}
+.pqi-q{font-size:.73rem;color:var(--muted);margin-bottom:.2rem}
+.pqi-a{font-size:.78rem;color:var(--graphite);font-weight:500}
+.pqi-score{font-size:.65rem;color:var(--lav)}
+.profile-hist-list{margin-top:.75rem}
+.phi-item{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:8px;padding:.55rem .75rem;margin-bottom:.35rem;border:1px solid var(--border)}
+.phi-title{font-size:.78rem;font-weight:500;color:var(--graphite)}
+.phi-meta{font-size:.65rem;color:var(--muted)}
+
+/* Login */
+.login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,var(--lav-l) 0%,var(--sage-l) 100%);display:flex;align-items:center;justify-content:center;z-index:300}
+.login-box{background:white;border-radius:22px;padding:2.1rem;width:330px;box-shadow:0 20px 60px var(--shadow);text-align:center}
+.login-av{width:64px;height:64px;border-radius:50%;overflow:hidden;border:3px solid var(--lav-m);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Playfair Display',serif;font-size:1.4rem;color:white;font-weight:600;background:linear-gradient(135deg,var(--lav),var(--sage));animation:pulse-ring 3s ease-in-out infinite}
+.login-av img{width:100%;height:100%;object-fit:cover}
+.login-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--lav);margin-bottom:.2rem}
+.login-sub{font-size:.76rem;color:var(--muted);margin-bottom:1.4rem}
+.login-err{background:#FEE2E2;color:#DC2626;border-radius:8px;padding:.5rem .75rem;font-size:.76rem;margin-bottom:.65rem;display:none}
+.login-hint{font-size:.7rem;color:var(--muted);margin-top:.85rem;line-height:1.55}
+
+/* Toast */
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;background:var(--graphite);color:white;padding:.65rem 1.1rem;border-radius:11px;font-size:.8rem;z-index:999;opacity:0;transform:translateY(7px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:700px){
+  .sidebar{display:none}
+  :root{--nav-w:52px}
+  .nav-btn span{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-av" id="loginAv">V</div>
+    <div class="login-title">Val</div>
+    <div class="login-sub">Saúde · Sexualidade · Relacionamentos</div>
+    <div class="login-err" id="loginErr"></div>
+    <label class="fl" for="lu" style="text-align:left;display:block">Usuário</label>
+    <input class="field" id="lu" type="text" placeholder="Seu usuário" autocomplete="username" style="margin-bottom:.6rem">
+    <label class="fl" for="lp" style="text-align:left;display:block">Senha</label>
+    <input class="field" id="lp" type="password" placeholder="Sua senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-primary" style="width:100%;margin-top:.9rem;justify-content:center" onclick="doLogin()">Entrar</button>
+    <p class="login-hint">Este é um espaço privado e seguro.<br>Trate as informações com respeito e confidencialidade.</p>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-av" id="hdrAv">V</div>
+    <div>
+      <div class="logo-name">Val</div>
+      <div class="logo-tag">Saúde &amp; Relacionamentos</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="online-badge"><div class="dot"></div>Disponível</div>
+    <button class="btn-icon" title="Trocar senha" onclick="openPassModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </button>
+    <button class="btn-icon" id="adminBtn" title="Administração" onclick="openAdmin()" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+    </button>
+    <button class="btn-icon" title="Sair" onclick="doLogout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- SIDE NAV -->
+  <nav class="side-nav">
+    <button class="nav-btn active" id="nav-chat" onclick="showPage('chat')" title="Chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Chat</span>
+    </button>
+    <button class="nav-btn" id="nav-quiz" onclick="showPage('quiz')" title="Quiz">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Quiz</span>
+    </button>
+    <button class="nav-btn" id="nav-indicacoes" onclick="showPage('indicacoes')" title="Indicar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      <span>Indicar</span>
+    </button>
+    <button class="nav-btn" id="nav-sugestoes" onclick="showPage('sugestoes')" title="Sugestões">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 3-1.8 5.4-4.5 6.5V17a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-1.5C6.8 14.4 5 12 5 9a7 7 0 0 1 7-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg>
+      <span>Ideias</span>
+    </button>
+  </nav>
+
+  <!-- CHAT PAGE -->
+  <div class="page active" id="page-chat">
+    <div class="sidebar">
+      <div class="sb-card">
+        <h3>Posso ajudar com…</h3>
+        <div class="topic-item" onclick="suggest('saúde mental e bem-estar emocional')"><div class="t-icon" style="background:#EDE9F6">🧠</div>Saúde mental</div>
+        <div class="topic-item" onclick="suggest('saúde física e hábitos saudáveis')"><div class="t-icon" style="background:#E8F2EF">💪</div>Saúde física</div>
+        <div class="topic-item" onclick="suggest('sexualidade e intimidade')"><div class="t-icon" style="background:#FCE7F3">💜</div>Sexualidade</div>
+        <div class="topic-item" onclick="suggest('relacionamentos amorosos')"><div class="t-icon" style="background:#FEE2E2">❤️</div>Amor</div>
+        <div class="topic-item" onclick="suggest('relacionamentos familiares')"><div class="t-icon" style="background:#FEF3C7">👨‍👩‍👧</div>Família</div>
+        <div class="topic-item" onclick="suggest('amizades e vínculos sociais')"><div class="t-icon" style="background:#D1FAE5">🤝</div>Amizades</div>
+        <div class="topic-item" onclick="suggest('autoestima e autoconhecimento')"><div class="t-icon" style="background:#EDE9F6">✨</div>Autoestima</div>
+      </div>
+      <div class="tip-box">
+        <strong>💜 Lembre-se</strong>
+        Buscar ajuda é um ato de coragem. Estou aqui para ouvir, sem julgamentos.
+      </div>
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-top">
+        <div class="chat-top-l">
+          <div class="chat-av" id="chatAv">V</div>
+          <div><div class="chat-name-txt">Val</div><div class="chat-role-txt">Especialista em Saúde &amp; Relacionamentos</div></div>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted)" id="chatUserLbl"></div>
+      </div>
+      <div class="messages" id="messages"></div>
+      <div class="input-area">
+        <textarea class="msg-input" id="msgInput" placeholder="Digite sua mensagem…" rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ PAGE -->
+  <div class="page" id="page-quiz">
+    <div class="quiz-wrap" id="quizWrap"></div>
+  </div>
+
+  <!-- INDICAÇÕES PAGE -->
+  <div class="page" id="page-indicacoes">
+    <div class="ind-wrap" id="indWrap"></div>
+  </div>
+
+  <!-- SUGESTÕES PAGE -->
+  <div class="page" id="page-sugestoes">
+    <div class="sug-wrap" id="sugWrap"></div>
+  </div>
+
+</div><!-- /app-body -->
+
+<!-- MODAL SENHA -->
+<div class="modal-overlay" id="passModal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title">🔒 Alterar Senha<button class="modal-close" onclick="closePass()">✕</button></div>
+    <label class="fl">Senha atual</label><input class="field" id="pOld" type="password">
+    <label class="fl">Nova senha</label><input class="field" id="pNew" type="password">
+    <label class="fl">Confirmar nova senha</label><input class="field" id="pConf" type="password">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closePass()">Cancelar</button>
+      <button class="btn btn-primary" onclick="changePass()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADMIN -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal">
+    <div class="modal-title">Administração<button class="modal-close" onclick="closeAdmin()">✕</button></div>
+    <div id="adminGate">
+      <label class="fl">Senha de administrador</label>
+      <input class="field" id="adminPw" type="password" onkeydown="if(event.key==='Enter')checkAdmin()">
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeAdmin()">Cancelar</button>
+        <button class="btn btn-primary" onclick="checkAdmin()">Entrar</button>
+      </div>
+    </div>
+    <div id="adminPanel" style="display:none">
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('config',this)">Configuração</button>
+        <button class="tab-btn" onclick="switchTab('kb',this)">Conhecimento</button>
+        <button class="tab-btn" onclick="switchTab('history',this)">Histórico</button>
+        <button class="tab-btn" onclick="switchTab('profiles',this)">Perfis</button>
+        <button class="tab-btn" onclick="switchTab('indicacoes',this)">Indicações</button>
+        <button class="tab-btn" onclick="switchTab('sugestoes-adm',this)">Sugestões</button>
+        <button class="tab-btn" onclick="switchTab('security',this)">Senha Admin</button>
+      </div>
+
+      <div class="tab-content active" id="tab-config">
+        <label class="fl">Personalidade da Val</label>
+        <textarea class="field" id="cfgP" rows="4"></textarea>
+        <label class="fl">Temas permitidos</label>
+        <textarea class="field" id="cfgT" rows="3"></textarea>
+        <label class="fl">Regras</label>
+        <textarea class="field" id="cfgR" rows="3"></textarea>
+        <label class="fl">Mensagem de boas-vindas</label>
+        <textarea class="field" id="cfgW" rows="2"></textarea>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="restoreDef()">↺ Padrão</button>
+          <button class="btn btn-outline" onclick="loadCfgForm()">↺ Recarregar</button>
+          <button class="btn btn-primary" onclick="saveCfg()">Salvar</button>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-kb">
+        <label class="fl">Adicionar por texto</label>
+        <textarea class="field" id="kbText" rows="3" placeholder="Fato, orientação ou informação para Val saber…"></textarea>
+        <label class="fl">Ou carregar arquivo .TXT</label>
+        <input type="file" id="kbFile" accept=".txt" style="font-size:.78rem;margin-bottom:.4rem">
+        <button class="btn btn-primary btn-sm" style="margin-top:.2rem" onclick="addKb()">+ Adicionar</button>
+        <div class="kb-list" id="kbList"><div class="empty">Carregando…</div></div>
+      </div>
+
+      <div class="tab-content" id="tab-history">
+        <div id="histList"><div class="empty">Carregando…</div></div>
+      </div>
+
+      <div class="tab-content" id="tab-profiles">
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:.85rem">Resultados do Quiz de Perfil por usuária</div>
+        <div id="profilesList"><div class="empty">Carregando…</div></div>
+      </div>
+
+      <div class="tab-content" id="tab-indicacoes">
+        <!-- Configuração de requisitos -->
+        <div class="req-config">
+          <div class="req-config-title">⚙️ Requisitos para indicar</div>
+          <div class="req-config-row">
+            <span class="req-config-label">Quiz respondidos (mínimo)</span>
+            <input class="req-config-input" type="number" id="reqQuiz" min="0" max="99" value="1">
+          </div>
+          <div class="req-config-row">
+            <span class="req-config-label">Dias mínimos no portal</span>
+            <input class="req-config-input" type="number" id="reqDias" min="0" max="365" value="30">
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:.75rem">
+            <button class="btn btn-primary btn-sm" onclick="saveRequisitos()">Salvar requisitos</button>
+          </div>
+        </div>
+        <!-- Lista de indicações -->
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.65rem">Indicações recebidas</div>
+        <div style="display:flex;gap:.4rem;margin-bottom:.85rem;flex-wrap:wrap">
+          <button class="btn btn-sm btn-outline" onclick="filterInd('todas',this)" style="border-color:var(--lav);color:var(--lav)">Todas</button>
+          <button class="btn btn-sm btn-outline" onclick="filterInd('pendente',this)">⏳ Pendentes</button>
+          <button class="btn btn-sm btn-outline" onclick="filterInd('aprovada',this)">✅ Aprovadas</button>
+          <button class="btn btn-sm btn-outline" onclick="filterInd('recusada',this)">❌ Recusadas</button>
+        </div>
+        <div id="adminIndList"><div class="empty">Carregando…</div></div>
+      </div>
+
+      <div class="tab-content" id="tab-sugestoes-adm">
+        <div class="adm-sug-filters">
+          <button class="btn btn-sm btn-outline" onclick="filterSug('todas',this)" style="border-color:var(--lav);color:var(--lav)">Todas</button>
+          <button class="btn btn-sm btn-outline" onclick="filterSug('quiz',this)">📋 Quiz</button>
+          <button class="btn btn-sm btn-outline" onclick="filterSug('historia',this)">📖 Histórias</button>
+          <button class="btn btn-sm btn-outline" onclick="filterSug('melhoria',this)">💡 Melhorias</button>
+          <button class="btn btn-sm btn-outline" onclick="filterSug('pendente',this)">⏳ Pendentes</button>
+        </div>
+        <div id="adminSugList"><div class="empty">Carregando…</div></div>
+      </div>
+
+      <div class="tab-content" id="tab-security">
+        <label class="fl">Nova senha de administrador</label>
+        <input class="field" id="nAdminP" type="password">
+        <label class="fl">Confirmar</label>
+        <input class="field" id="cAdminP" type="password">
+        <div class="modal-actions">
+          <button class="btn btn-primary" onclick="saveAdminPass()">Salvar senha</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIGURAÇÃO
+// ═══════════════════════════════════════════════════════════════
+const API_URL = 'https://val-site-ect3.vercel.app/api/chat';
+const VAL_PHOTO = ''; // URL da foto após upload no GitHub
+
+const USERS = { maria:'rosa123', joao:'azul456', ana:'verde789', carlos:'sol2024', patricia:'flores1' };
 
 const DEFAULT_CONFIG = {
-  personality: `Você é Val, uma mulher de 50 anos, educada, formal e acolhedora. Especialista em saúde, sexualidade e relacionamentos. Responda sempre em português do Brasil, de forma respeitosa, empática e formal. Use "você" (nunca "tu"). Seja paciente e gentil. Nunca se apresente como IA ou robô.`,
-  topics: `Responda APENAS sobre saúde (bem-estar, saúde mental, física, preventiva), sexualidade (intimidade, identidade, prazer saudável, saúde sexual) e relacionamentos (família, amizades, amor, autoestima). Se perguntarem outro tema, diga educadamente que só trata desses assuntos.`,
-  rules: `Nunca forneça diagnósticos médicos definitivos. Recomende sempre buscar um profissional quando necessário. Mantenha confidencialidade e respeito absoluto. Nunca seja julgamental sobre escolhas pessoais ou orientação sexual.`,
-  welcome: `Olá! Seja muito bem-vinda(o). É um prazer tê-la(o) aqui. Meu nome é Val, e estou aqui para conversar sobre saúde, sexualidade e relacionamentos. Como posso ajudá-la(o) hoje?`
+  personality:`Você é Val, uma mulher de 50 anos, educada, formal e acolhedora. Especialista em saúde, sexualidade e relacionamentos. Responda sempre em português do Brasil, de forma respeitosa, empática e formal. Use "você" (nunca "tu"). Seja paciente e gentil. Nunca se apresente como IA ou robô.`,
+  topics:`Responda APENAS sobre saúde (bem-estar, saúde mental, física, preventiva), sexualidade (intimidade, identidade, prazer saudável, saúde sexual) e relacionamentos (família, amizades, amor, autoestima). Se perguntarem outro tema, diga educadamente que só trata desses assuntos.`,
+  rules:`Nunca forneça diagnósticos médicos definitivos. Recomende sempre buscar um profissional quando necessário. Mantenha confidencialidade e respeito absoluto. Nunca seja julgamental sobre escolhas pessoais ou orientação sexual.`,
+  welcome:`Olá! Seja muito bem-vinda(o). É um prazer tê-la(o) aqui. Meu nome é Val, e estou aqui para conversar sobre saúde, sexualidade e relacionamentos. Como posso ajudá-la(o) hoje?`
 };
 
-module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+// ═══════════════════════════════════════════════════════════════
+// QUIZ DATA
+// ═══════════════════════════════════════════════════════════════
+const ALL_PRACTICES = [
+  {text:"Sexo vaginal",score:0},{text:"Sexo oral (dar)",score:1},{text:"Sexo oral (receber)",score:1},
+  {text:"Sexo anal",score:2},{text:"Ejaculação na boca (engolir)",score:2},{text:"Ejaculação no rosto ou corpo",score:2},
+  {text:"Uso de brinquedos ou objetos",score:1},{text:"Amarras / restrição física",score:2},
+  {text:"Dominação e submissão (D/s)",score:3},{text:"Trisal ou sexo a três",score:3},{text:"BDSM / práticas avançadas",score:3},
+];
+const EXTRA_CURIOSITY = [
+  {text:"Beijo grego (receber)",score:2},{text:"Beijo grego (dar)",score:2},{text:"ATM (ass to mouth)",score:3},
+  {text:"Cuspir na boca",score:2},{text:"Urinar na parceira (golden shower)",score:3},{text:"Beijar / lamber pés",score:2},
+];
+const BLOCOS = ["Experiências Anteriores","Satisfação Sexual Atual","Qualidade do Relacionamento","Expectativas em Relação ao Parceiro"];
+const BLOCO_E = ["📖","🌡️","💬","🎯"];
+const BLOCO_RANGES = [[0,7],[7,15],[15,19],[19,22]];
+const BLOCO_MAXES  = [21,24,12,9];
 
-  const { action, payload } = req.body;
+const BASE_QUESTIONS = [
+  {id:1,bloco:"Experiências Anteriores",text:"Quantos parceiros sexuais você teve ao longo da vida, incluindo o atual?",options:[{text:"1 a 2",score:0},{text:"3 a 5",score:1},{text:"6 a 10",score:2},{text:"Mais de 10",score:3}]},
+  {id:2,bloco:"Experiências Anteriores",text:"Quais dessas práticas você já viveu com parceiros anteriores — excluindo seu parceiro atual?",type:"multi",key:"q2",options:[...ALL_PRACTICES,{text:"Outras",score:1,hasInput:true}]},
+  {id:3,bloco:"Experiências Anteriores",text:"Ao longo da sua vida sexual, você já teve orgasmo com penetração — sem estimulação manual adicional?",options:[{text:"Nunca",score:0},{text:"Raramente — aconteceu poucas vezes",score:1},{text:"Às vezes — depende muito do parceiro e da situação",score:2},{text:"Com frequência — é algo que acontece naturalmente comigo",score:3}]},
+  {id:4,bloco:"Experiências Anteriores",text:"Você já fingiu orgasmo com algum parceiro anterior?",options:[{text:"Nunca — sempre fui honesta",score:0},{text:"Uma ou duas vezes, em situações específicas",score:1},{text:"Com frequência em algum relacionamento específico",score:2},{text:"Sim, de forma habitual — era mais fácil que explicar",score:3}]},
+  {id:5,bloco:"Experiências Anteriores",text:"Pensando em toda a sua vida sexual — qual foi o melhor sexo que você já teve, e o que o tornou tão bom?",options:[{text:"Conexão emocional profunda com o parceiro",score:0},{text:"Parceiro muito atento ao meu prazer, sem pressa",score:1},{text:"Intensidade física, duração e variedade na mesma noite",score:2},{text:"Ele assumiu controle total — eu apenas recebi e obedeci",score:3}]},
+  {id:6,bloco:"Experiências Anteriores",text:"Com algum parceiro anterior, você já teve sexo espontâneo — sem planejamento, em lugar inusitado ou fora da rotina?",options:[{text:"Não — prefiro conforto e privacidade",score:0},{text:"Sim, algumas vezes — foi gostoso mas não é prioridade",score:1},{text:"Sim, com frequência — a espontaneidade me excita muito",score:2},{text:"Sim, e está entre as experiências mais excitantes que já vivi",score:3}]},
+  {id:7,bloco:"Experiências Anteriores",text:"Com parceiros anteriores, você já pediu explicitamente o que queria na cama?",options:[{text:"Nunca — tenho muita dificuldade de verbalizar",score:0},{text:"Raramente — me expresso mais por sinais físicos que palavras",score:1},{text:"Às vezes — quando me sinto segura e confortável",score:2},{text:"Sempre — comunicação sexual é fundamental para mim",score:3}]},
+  {id:8,bloco:"Satisfação Sexual Atual",text:"Quais dessas práticas você e seu parceiro atual já viveram juntos?",type:"multi",key:"q8",dynamic:"parceiro"},
+  {id:9,bloco:"Satisfação Sexual Atual",text:"Das práticas que você ainda não viveu com ninguém, quais despertam pelo menos curiosidade?",type:"multi",key:"q9",dynamic:"curiosidade"},
+  {id:10,bloco:"Satisfação Sexual Atual",text:"Com que frequência você e seu parceiro atual têm relações sexuais?",options:[{text:"Raramente — menos de 1 vez por mês",score:0},{text:"1 a 2 vezes por mês",score:1},{text:"1 a 2 vezes por semana",score:2},{text:"3 vezes ou mais por semana",score:3}]},
+  {id:11,bloco:"Satisfação Sexual Atual",text:"Você tem orgasmo na maioria das relações com seu parceiro atual?",options:[{text:"Quase nunca ou nunca",score:0},{text:"Em menos da metade das vezes",score:1},{text:"Na maioria das vezes",score:2},{text:"Quase sempre ou sempre",score:3}]},
+  {id:12,bloco:"Satisfação Sexual Atual",text:"Seu parceiro atual dedica tempo suficiente ao seu prazer — preliminares, atenção ao seu corpo?",options:[{text:"Não — é direto ao ponto e pouco atencioso",score:0},{text:"Às vezes — depende do dia e do humor dele",score:1},{text:"Na maioria das vezes sim",score:2},{text:"Sempre — ele claramente se preocupa com o meu prazer",score:3}]},
+  {id:13,bloco:"Satisfação Sexual Atual",text:"Você e seu parceiro atual têm variedade na vida sexual — posições, lugares, horários, fantasias?",options:[{text:"Não — é sempre a mesma rotina",score:0},{text:"Pouca variação — muda raramente",score:1},{text:"Boa variedade — experimentamos com regularidade",score:2},{text:"Muita — nossa vida sexual é criativa e exploratória",score:3}]},
+  {id:14,bloco:"Satisfação Sexual Atual",text:"Você sente desejo sexual pelo seu parceiro atual?",options:[{text:"Quase não sinto mais — o desejo foi embora",score:0},{text:"Sinto pouco — é mais hábito que desejo",score:1},{text:"Sinto, mas poderia ser mais intenso",score:2},{text:"Sinto com frequência e intensidade",score:3}]},
+  {id:15,bloco:"Satisfação Sexual Atual",text:"Você consegue falar com seu parceiro atual sobre o que quer e o que não está te satisfazendo na cama?",options:[{text:"Não — evito esse assunto para não gerar conflito",score:0},{text:"Com dificuldade — é desconfortável mas já tentei",score:1},{text:"Sim, às vezes — quando a abertura aparece",score:2},{text:"Sim, com naturalidade — faz parte da nossa dinâmica",score:3}]},
+  {id:16,bloco:"Qualidade do Relacionamento",text:"Como você descreveria o nível de afeto e carinho entre você e seu parceiro atual fora da cama?",options:[{text:"Muito baixo — somos mais companheiros que casal",score:0},{text:"Razoável — existe mas não é consistente",score:1},{text:"Bom — há carinho genuíno no cotidiano",score:2},{text:"Ótimo — nos tocamos, olhamos e nos escolhemos todo dia",score:3}]},
+  {id:17,bloco:"Qualidade do Relacionamento",text:"Quando você e seu parceiro atual brigam, conseguem resolver os conflitos sem deixar ressentimento?",options:[{text:"Não — conflitos viram silêncio ou ressentimento acumulado",score:0},{text:"Às vezes — alguns conflitos ficam sem resolução",score:1},{text:"Na maioria das vezes conseguimos resolver",score:2},{text:"Sim — conflitos são resolvidos com diálogo e sem rancor",score:3}]},
+  {id:18,bloco:"Qualidade do Relacionamento",text:"Você se sente admirada e desejada pelo seu parceiro atual fora da cama?",options:[{text:"Não — sinto que sou invisível para ele",score:0},{text:"Raramente — falta mais atenção e reconhecimento",score:1},{text:"Às vezes — quando ele está mais presente",score:2},{text:"Sim — ele me faz sentir especial e desejada com frequência",score:3}]},
+  {id:19,bloco:"Qualidade do Relacionamento",text:"Você confia completamente no seu parceiro atual — emocional e sexualmente?",options:[{text:"Não — há inseguranças ou histórico que abalou a confiança",score:0},{text:"Parcialmente — confio em algumas áreas mais que outras",score:1},{text:"Sim, na maior parte — pequenas inseguranças existem mas não dominam",score:2},{text:"Completamente — é a base mais sólida do nosso relacionamento",score:3}]},
+  {id:20,bloco:"Expectativas em Relação ao Parceiro",text:"O que você mais quer que mude na vida sexual com seu parceiro atual?",options:[{text:"Mais frequência — simplesmente acontecer mais vezes",score:0},{text:"Mais atenção ao meu prazer — menos pressa, mais foco em mim",score:1},{text:"Mais ousadia — novidades, fantasias, exploração",score:2},{text:"Ele assumir controle — quero ser conduzida com firmeza",score:3}]},
+  {id:21,bloco:"Expectativas em Relação ao Parceiro",text:"Você já tentou introduzir alguma fantasia ou prática nova com seu parceiro atual?",options:[{text:"Nunca tentei — tenho medo da reação dele",score:0},{text:"Tentei e ele ignorou ou reagiu com indiferença",score:1},{text:"Tentei e ele topou parcialmente — ainda há resistência",score:2},{text:"Sim, e ele foi receptivo — exploramos juntos",score:3}]},
+  {id:22,bloco:"Expectativas em Relação ao Parceiro",text:"Na sua visão, qual é o maior problema sexual do seu parceiro atual?",options:[{text:"Baixa frequência ou falta de iniciativa",score:0},{text:"Pouca atenção ao meu prazer — foco apenas no dele",score:1},{text:"Falta de criatividade e disposição para explorar",score:2},{text:"Ausência de presença, liderança e intensidade na cama",score:3}]},
+];
 
+const PROFILES = [
+  {min:0,max:14,emoji:"🌱",title:"Início de Jornada",cor:"#7a9e7e",desc:"Sua experiência sexual ainda é restrita e a satisfação no relacionamento atual está abaixo do que você merece. Há pouca variedade, comunicação sexual limitada e expectativas não verbalizadas. Isso não é um problema sem solução — é um ponto de partida.",tip:"A Val pode te ajudar a entender o que você quer, a colocar isso em palavras e a criar uma abertura gradual com seu parceiro sobre suas necessidades sexuais."},
+  {min:15,max:28,emoji:"⚖️",title:"Relacionamento Estável com Lacunas",cor:"#a09060",desc:"Seu relacionamento tem base sólida mas a vida sexual ficou para trás. A frequência é baixa, a variedade sumiu e o desejo precisa de reacendimento. Você sente o que falta, mas ainda não encontrou o caminho para mudar.",tip:"A Val pode te ajudar a identificar exatamente o que apagou o desejo, como reativar a atração e quais conversas precisam acontecer."},
+  {min:29,max:42,emoji:"🔥",title:"Desejo Presente, Exploração Incompleta",cor:"#c97d50",desc:"Você tem desejo, tem abertura e já viveu experiências que alargaram seus horizontes. O problema é que o relacionamento atual não acompanha o que você sabe que é possível. Há uma distância entre o que já viveu ou quer viver e o que está vivendo agora.",tip:"A Val pode te ajudar a mapear essa distância, entender o que é negociável com seu parceiro e como ter essa conversa sem destruir o que vocês construíram."},
+  {min:43,max:56,emoji:"🌹",title:"Vida Sexual Ativa com Potencial de Aprofundamento",cor:"#c97d7d",desc:"Você tem uma vida sexual ativa, comunicação razoável e um parceiro que participa. Mas você sabe que existe um nível mais profundo — de intensidade, de dinâmica, de entrega — que ainda não foi tocado. A base está lá. O que falta é coragem para ir mais fundo.",tip:"A Val pode ser sua parceira para explorar esse próximo nível — práticas, dinâmicas, conversas difíceis e fantasias que você ainda guarda para si mesma."},
+  {min:57,max:66,emoji:"💎",title:"Plenitude Sexual em Construção",cor:"#9a2050",desc:"Você tem experiência, autoconhecimento, comunicação e um relacionamento com base real. Sua vida sexual é satisfatória e você sabe o que quer. O que vem a seguir é o refinamento — aprofundar a dinâmica e criar com seu parceiro algo que seja verdadeiramente só de vocês.",tip:"A Val pode conversar com você sobre as camadas mais sofisticadas da intimidade — dinâmica de poder, práticas avançadas e como continuar crescendo juntos."},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let currentUser='', isAdmin=false, cfg={...DEFAULT_CONFIG}, chatMsgs=[];
+
+// Quiz state
+let qCurrent=0, qAnswers=[], qSelected=null, qMultiSel=[], qOtherText='';
+let qQ2Texts=[], qQ8Texts=[], qUserHistory=[];
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+async function api(action, payload={}) {
   try {
+    const r = await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,payload})});
+    return await r.json();
+  } catch(e){ console.error(e); return {error:e.message}; }
+}
+function toast(msg,dur=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur)}
+function tnow(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='quiz') renderQuizPage();
+  if(name==='indicacoes') renderIndPage();
+  if(name==='sugestoes') renderSugPage();
+}
 
-    // ── CONFIG ──────────────────────────────────────────────
-    if (action === 'getConfig') {
-      const r = await sb('configs?id=eq.main');
-      const d = await r.json();
-      return res.json(d[0] || DEFAULT_CONFIG);
-    }
+function setAvatars(){
+  if(!VAL_PHOTO) return;
+  const img=`<img src="${VAL_PHOTO}" alt="Val" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  ['hdrAv','loginAv','chatAv'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=img});
+}
 
-    if (action === 'saveConfig') {
-      await sb('configs', {
-        method: 'POST',
-        h: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ id: 'main', ...payload, updated_at: new Date().toISOString() })
-      });
-      return res.json({ ok: true });
-    }
+// ═══════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════
+async function doLogin(){
+  const user=document.getElementById('lu').value.trim().toLowerCase();
+  const pass=document.getElementById('lp').value;
+  const err=document.getElementById('loginErr');
+  err.style.display='none';
+  if(!user||!pass){showErr('Preencha usuário e senha.');return}
 
-    // ── HISTÓRICO DE CHAT ────────────────────────────────────
-    if (action === 'getHistory') {
-      const r = await sb(`historico?usuario=eq.${encodeURIComponent(payload.usuario)}&order=created_at.asc`);
-      return res.json(await r.json());
-    }
-
-    if (action === 'getAllHistory') {
-      const r = await sb('historico?order=created_at.desc');
-      return res.json(await r.json());
-    }
-
-    if (action === 'saveHistory') {
-      await sb('historico', { method: 'POST', body: JSON.stringify(payload) });
-      return res.json({ ok: true });
-    }
-
-    if (action === 'deleteHistory') {
-      await sb(`historico?usuario=eq.${encodeURIComponent(payload.usuario)}`, { method: 'DELETE' });
-      return res.json({ ok: true });
-    }
-
-    // ── BASE DE CONHECIMENTO ─────────────────────────────────
-    if (action === 'getKb') {
-      const r = await sb('conhecimento?order=created_at.asc');
-      return res.json(await r.json());
-    }
-
-    if (action === 'saveKb') {
-      await sb('conhecimento', { method: 'POST', body: JSON.stringify(payload) });
-      return res.json({ ok: true });
-    }
-
-    if (action === 'deleteKb') {
-      await sb(`conhecimento?id=eq.${payload.id}`, { method: 'DELETE' });
-      return res.json({ ok: true });
-    }
-
-    // ── SENHAS ───────────────────────────────────────────────
-    if (action === 'getPassword') {
-      const r = await sb(`senhas?usuario=eq.${encodeURIComponent(payload.usuario)}`);
-      const d = await r.json();
-      return res.json({ senha: d[0]?.senha || null });
-    }
-
-    if (action === 'savePassword') {
-      await sb('senhas', {
-        method: 'POST',
-        h: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ ...payload, updated_at: new Date().toISOString() })
-      });
-      return res.json({ ok: true });
-    }
-
-    // ── SUGESTÕES ────────────────────────────────────────────
-    if (action === 'saveSugestao') {
-      await sb('sugestoes', {
-        method: 'POST',
-        body: JSON.stringify({
-          usuario:    payload.usuario,
-          tipo:       payload.tipo,       // 'quiz' | 'historia' | 'melhoria'
-          titulo:     payload.titulo,
-          descricao:  payload.descricao,
-          status:     'pendente',
-          nota_admin: null,
-          created_at: new Date().toISOString()
-        })
-      });
-      return res.json({ ok: true });
-    }
-
-    if (action === 'getSugestoes') {
-      // Sugestões de um usuário específico, mais recentes primeiro
-      const r = await sb(`sugestoes?usuario=eq.${encodeURIComponent(payload.usuario)}&order=created_at.desc`);
-      return res.json(await r.json());
-    }
-
-    if (action === 'getAllSugestoes') {
-      // Todas — para o admin
-      const r = await sb('sugestoes?order=created_at.desc');
-      return res.json(await r.json());
-    }
-
-    if (action === 'updateSugestao') {
-      // Admin atualiza status e/ou nota
-      await sb(`sugestoes?id=eq.${payload.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          status:     payload.status,
-          nota_admin: payload.nota_admin || null,
-          updated_at: new Date().toISOString()
-        })
-      });
-      return res.json({ ok: true });
-    }
-
-    // ── REQUISITOS DE INDICAÇÃO ──────────────────────────────
-    if (action === 'getRequisitos') {
-      const r = await sb('configs?id=eq.requisitos_indicacao');
-      const d = await r.json();
-      if (d && d[0]) return res.json({ min_quiz: d[0].min_quiz ?? 1, min_dias: d[0].min_dias ?? 30 });
-      return res.json({ min_quiz: 1, min_dias: 30 });
-    }
-
-    if (action === 'saveRequisitos') {
-      await sb('configs', {
-        method: 'POST',
-        h: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({
-          id: 'requisitos_indicacao',
-          min_quiz: payload.min_quiz,
-          min_dias: payload.min_dias,
-          updated_at: new Date().toISOString()
-        })
-      });
-      return res.json({ ok: true });
-    }
-
-    // ── INDICAÇÕES ───────────────────────────────────────────
-    if (action === 'saveIndicacao') {
-      await sb('indicacoes', {
-        method: 'POST',
-        body: JSON.stringify({
-          indicante:     payload.indicante,
-          nome_indicada: payload.nome_indicada,
-          idade:         payload.idade,
-          estado_civil:  payload.estado_civil,
-          meio_contato:  payload.meio_contato,
-          contato:       payload.contato,
-          descricao:     payload.descricao,
-          status:        'pendente',
-          motivo_admin:  null,
-          created_at:    new Date().toISOString()
-        })
-      });
-      return res.json({ ok: true });
-    }
-
-    if (action === 'getIndicacoes') {
-      // Indicações feitas por um usuário específico
-      const r = await sb(`indicacoes?indicante=eq.${encodeURIComponent(payload.usuario)}&order=created_at.desc`);
-      return res.json(await r.json());
-    }
-
-    if (action === 'getAllIndicacoes') {
-      // Todas as indicações — para o admin
-      const r = await sb('indicacoes?order=created_at.desc');
-      return res.json(await r.json());
-    }
-
-    if (action === 'updateIndicacao') {
-      // Admin aprova ou recusa
-      await sb(`indicacoes?id=eq.${payload.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          status:       payload.status,
-          motivo_admin: payload.motivo_admin || null,
-          updated_at:   new Date().toISOString()
-        })
-      });
-      return res.json({ ok: true });
-    }
-
-    // ── QUIZ RESULTADOS ──────────────────────────────────────
-    if (action === 'saveQuizResultado') {
-      await sb('quiz_resultados', {
-        method: 'POST',
-        body: JSON.stringify({
-          usuario:      payload.usuario,
-          pontuacao:    payload.pontuacao,
-          perfil:       payload.perfil,
-          respostas:    payload.respostas,      // JSON string com todas as respostas
-          bloco_scores: payload.bloco_scores,   // JSON string com pontuação por bloco
-          created_at:   new Date().toISOString()
-        })
-      });
-      return res.json({ ok: true });
-    }
-
-    if (action === 'getQuizResultados') {
-      // Resultados de um usuário específico, do mais recente ao mais antigo
-      const r = await sb(`quiz_resultados?usuario=eq.${encodeURIComponent(payload.usuario)}&order=created_at.desc`);
-      return res.json(await r.json());
-    }
-
-    if (action === 'getAllQuizResultados') {
-      // Todos os resultados — para o admin
-      const r = await sb('quiz_resultados?order=created_at.desc');
-      return res.json(await r.json());
-    }
-
-    // ── CHAT COM A VAL ───────────────────────────────────────
-    if (action === 'chat') {
-      const { system, messages } = payload;
-
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          system: system || '',
-          messages
-        })
-      });
-
-      const d = await r.json();
-      console.log('Anthropic response type:', d.type, '| stop_reason:', d.stop_reason);
-
-      if (!r.ok) {
-        console.error('Anthropic error:', JSON.stringify(d));
-        return res.json({ error: d.error?.message || 'Erro na API' });
-      }
-
-      // Extração segura — evita "undefined"
-      const reply = Array.isArray(d.content)
-        ? d.content.filter(b => b.type === 'text').map(b => b.text).join('')
-        : '';
-
-      if (!reply) {
-        console.error('Empty reply. Full response:', JSON.stringify(d));
-        return res.json({ error: 'Resposta vazia da API' });
-      }
-
-      return res.json({ reply });
-    }
-
-    return res.status(400).json({ error: 'Ação desconhecida' });
-
-  } catch (e) {
-    console.error('Unhandled error:', e);
-    return res.status(500).json({ error: e.message });
+  if(user==='admin'){
+    const pd=await api('getPassword',{usuario:'__admin__'});
+    if(pass!==(pd.senha||'admin2024')){showErr('Credenciais inválidas.');return}
+    currentUser='admin';isAdmin=true;enterApp();return;
   }
-};
+  if(!(user in USERS)){showErr('Usuário não encontrado.');return}
+  const pd=await api('getPassword',{usuario:user});
+  if(pass!==(pd.senha||USERS[user])){showErr('Senha incorreta.');return}
+  currentUser=user;isAdmin=false;enterApp();
+}
+function showErr(m){const e=document.getElementById('loginErr');e.textContent=m;e.style.display='block'}
+
+async function enterApp(){
+  document.getElementById('loginOverlay').style.display='none';
+  document.getElementById('chatUserLbl').textContent=currentUser;
+  if(isAdmin)document.getElementById('adminBtn').style.display='flex';
+  setAvatars();
+  await loadConfig();
+  await loadHistory();
+}
+function doLogout(){
+  currentUser='';isAdmin=false;chatMsgs=[];
+  document.getElementById('messages').innerHTML='';
+  document.getElementById('lu').value='';document.getElementById('lp').value='';
+  document.getElementById('loginErr').style.display='none';
+  document.getElementById('loginOverlay').style.display='flex';
+  document.getElementById('adminBtn').style.display='none';
+  showPage('chat');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════════════════════════
+async function loadConfig(){
+  const d=await api('getConfig');
+  if(d&&!d.error)cfg={...DEFAULT_CONFIG,...d};
+}
+async function loadHistory(){
+  const wrap=document.getElementById('messages');
+  wrap.innerHTML='';chatMsgs=[];
+  const data=await api('getHistory',{usuario:currentUser});
+  if(data&&Array.isArray(data)&&data.length>0){
+    data.forEach(r=>{
+      if(r.papel==='system')return;
+      addBubble(r.papel==='user'?'user':'bot',r.mensagem,r.created_at);
+      chatMsgs.push({role:r.papel==='user'?'user':'assistant',content:r.mensagem});
+    });
+    const name=currentUser.charAt(0).toUpperCase()+currentUser.slice(1);
+    const g=`Bem-vinda(o) de volta, ${name}! Como posso ajudá-la(o) hoje?`;
+    addBubble('bot',g);chatMsgs.push({role:'assistant',content:g});
+    await api('saveHistory',{usuario:currentUser,papel:'assistant',mensagem:g});
+  } else {
+    const w=cfg.welcome||DEFAULT_CONFIG.welcome;
+    addBubble('bot',w);chatMsgs.push({role:'assistant',content:w});
+    await api('saveHistory',{usuario:currentUser,papel:'assistant',mensagem:w});
+  }
+}
+function addBubble(role,text,ts){
+  const wrap=document.getElementById('messages');
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  const init=role==='bot'?'V':(currentUser[0]||'U').toUpperCase();
+  const av=VAL_PHOTO&&role==='bot'?`<img src="${VAL_PHOTO}" alt="Val" style="width:100%;height:100%;object-fit:cover">`:`${init}`;
+  const time=ts?new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):tnow();
+  div.innerHTML=`<div class="msg-av-sm">${av}</div><div><div class="bubble">${text.replace(/\n/g,'<br>')}</div><div class="msg-time">${time}</div></div>`;
+  wrap.appendChild(div);wrap.scrollTop=wrap.scrollHeight;
+}
+async function sendMsg(){
+  const inp=document.getElementById('msgInput');
+  const text=inp.value.trim();
+  if(!text||!currentUser)return;
+  inp.value='';inp.style.height='auto';
+  addBubble('user',text);chatMsgs.push({role:'user',content:text});
+  await api('saveHistory',{usuario:currentUser,papel:'user',mensagem:text});
+  document.getElementById('sendBtn').disabled=true;
+  const wrap=document.getElementById('messages');
+  const typing=document.createElement('div');typing.className='msg bot';typing.id='typing';
+  const av=VAL_PHOTO?`<img src="${VAL_PHOTO}" alt="Val" style="width:100%;height:100%;object-fit:cover">`:'V';
+  typing.innerHTML=`<div class="msg-av-sm">${av}</div><div class="typing-indicator"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  wrap.appendChild(typing);wrap.scrollTop=wrap.scrollHeight;
+
+  // ── Base de conhecimento geral (admin)
+  const kb=await api('getKb');
+  let kbCtx='';
+  if(kb&&Array.isArray(kb)&&kb.length)
+    kbCtx='\n\n---\nBASE DE CONHECIMENTO GERAL:\n'+kb.map(k=>`• ${k.conteudo}`).join('\n');
+
+  // ── Perfil da usuária a partir do quiz mais recente
+  let quizCtx='';
+  const qr=await api('getQuizResultados',{usuario:currentUser});
+  if(qr&&Array.isArray(qr)&&qr.length){
+    const ultimo=qr[0];
+    const respostas=ultimo.respostas?JSON.parse(ultimo.respostas):[];
+    const blocos=ultimo.bloco_scores?JSON.parse(ultimo.bloco_scores):[];
+    const userName=currentUser.charAt(0).toUpperCase()+currentUser.slice(1);
+    const dataQuiz=new Date(ultimo.created_at).toLocaleDateString('pt-BR');
+    quizCtx=`\n\n---\nPERFIL DA USUÁRIA (${userName}) — Quiz respondido em ${dataQuiz}:\n`;
+    quizCtx+=`Perfil: ${ultimo.perfil} (${ultimo.pontuacao}/66 pontos)\n`;
+    if(blocos.length){
+      quizCtx+=`Pontuação por área:\n`;
+      blocos.forEach(b=>{ quizCtx+=`  • ${b.bloco}: ${b.pct}%\n`; });
+    }
+    if(respostas.length){
+      quizCtx+=`\nRespostas individuais:\n`;
+      respostas.forEach(a=>{
+        const resp=Array.isArray(a.selectedTexts)?a.selectedTexts.join(', '):a.selectedTexts;
+        quizCtx+=`  [${a.bloco}] ${a.question}\n  → ${resp}\n`;
+      });
+    }
+    quizCtx+=`\nUse essas informações para personalizar suas respostas, mas de forma natural e sem citar explicitamente que leu o quiz, a menos que a usuária pergunte diretamente sobre seu perfil.`;
+  }
+
+  const system=[cfg.personality,cfg.topics,cfg.rules].filter(Boolean).join('\n\n')+kbCtx+quizCtx;
+  const data=await api('chat',{system,messages:chatMsgs.map(m=>({role:m.role,content:m.content}))});
+  typing.remove();document.getElementById('sendBtn').disabled=false;
+  let reply='';
+  if(data&&data.reply&&typeof data.reply==='string'&&data.reply.trim())reply=data.reply;
+  else{reply='Desculpe, houve um problema técnico. Tente novamente.';console.error(data)}
+  addBubble('bot',reply);chatMsgs.push({role:'assistant',content:reply});
+  await api('saveHistory',{usuario:currentUser,papel:'assistant',mensagem:reply});
+}
+function suggest(t){const i=document.getElementById('msgInput');i.value=`Gostaria de conversar sobre ${t}.`;i.focus();showPage('chat')}
+
+// ═══════════════════════════════════════════════════════════════
+// QUIZ — PÁGINA
+// ═══════════════════════════════════════════════════════════════
+async function renderQuizPage(){
+  const wrap=document.getElementById('quizWrap');
+
+  // Load user quiz history from Supabase
+  const data=await api('getQuizResultados',{usuario:currentUser});
+  qUserHistory=Array.isArray(data)?data:[];
+
+  // Check cooldown (30 days)
+  const last=qUserHistory[0];
+  const canTake=!last||(Date.now()-new Date(last.created_at).getTime()>30*24*60*60*1000);
+  const daysLeft=last?Math.ceil((30*24*60*60*1000-(Date.now()-new Date(last.created_at).getTime()))/(24*60*60*1000)):0;
+
+  wrap.innerHTML=renderQuizIntro(canTake,daysLeft);
+}
+
+function renderQuizIntro(canTake,daysLeft){
+  const histHTML=qUserHistory.length?`
+    <div style="margin-bottom:1.25rem;text-align:left">
+      <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.55rem">Seus resultados anteriores</div>
+      <div class="quiz-hist-list">
+        ${qUserHistory.slice(0,5).map(r=>`
+          <div class="quiz-hist-item">
+            <div>
+              <div class="qhi-title">${r.perfil}</div>
+              <div class="qhi-meta">${new Date(r.created_at).toLocaleDateString('pt-BR')} · ${r.pontuacao} pontos</div>
+            </div>
+            <span class="qhi-badge">${getProfileEmoji(r.perfil)}</span>
+          </div>`).join('')}
+      </div>
+    </div>`:'';
+
+  const cooldownHTML=!canTake?`
+    <div class="quiz-cooldown">
+      <strong>⏳ Próxima disponibilidade em ${daysLeft} ${daysLeft===1?'dia':'dias'}</strong>
+      <span>O quiz pode ser refeito uma vez por mês.</span>
+    </div>`:'';
+
+  return `<div class="quiz-intro">
+    <div class="quiz-intro-icon">🌹</div>
+    <h2>Quiz de Perfil</h2>
+    <p>Perguntas diretas sobre suas experiências sexuais, satisfação atual, qualidade do relacionamento e o que você espera do seu parceiro.</p>
+    <div class="quiz-blocks">
+      ${BLOCOS.map((b,i)=>`<div class="quiz-block-item"><span class="qbi-icon">${BLOCO_E[i]}</span><div><div class="qbi-label">${b}</div></div></div>`).join('')}
+    </div>
+    ${histHTML}
+    ${cooldownHTML}
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem">🔞 Conteúdo adulto · Confidencial · 22 perguntas · ~10 minutos</div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="startQuiz()" ${!canTake?'disabled':''}>
+      ${qUserHistory.length?'Fazer novamente 🌹':'Começar agora 🌹'}
+    </button>
+  </div>`;
+}
+
+function getProfileEmoji(title){
+  const p=PROFILES.find(x=>x.title===title);return p?p.emoji:'🌹';
+}
+
+function startQuiz(){
+  qCurrent=0;qAnswers=[];qSelected=null;qMultiSel=[];qOtherText='';qQ2Texts=[];qQ8Texts=[];
+  // Limpar mapa de seleções anteriores
+  Object.keys(qOptIdxMap).forEach(k=>delete qOptIdxMap[k]);
+  renderQuestion();
+}
+
+function buildOptions(q){
+  if(!q.dynamic)return q.options;
+  if(q.dynamic==='parceiro')return[...ALL_PRACTICES,{text:"Outras",score:1,hasInput:true}];
+  if(q.dynamic==='curiosidade'){
+    const done=new Set([...qQ2Texts,...qQ8Texts]);
+    return [...ALL_PRACTICES.filter(p=>!done.has(p.text)),...EXTRA_CURIOSITY.filter(p=>!done.has(p.text)),{text:"Outras",score:1,hasInput:true}];
+  }
+  return[];
+}
+
+function renderQuestion(){
+  const q=BASE_QUESTIONS[qCurrent];
+  const opts=buildOptions(q);
+  const blocoIdx=BLOCOS.indexOf(q.bloco);
+  const pct=Math.round((qCurrent/BASE_QUESTIONS.length)*100);
+  const isMulti=q.type==='multi';
+
+  // canNext: para multi precisa ter seleção; para single verifica qOptIdxMap
+  const canNext=isMulti?qMultiSel.length>0:(qOptIdxMap[qCurrent]!==undefined);
+  const subLabel=q.key==='q8'?'Marque tudo que já fizeram juntos':q.key==='q9'?'Selecione tudo que desperta pelo menos curiosidade':isMulti?'Selecione todas que se aplicam':null;
+
+  const storedIdx=qOptIdxMap[qCurrent];
+
+  const optsHTML=isMulti?opts.map((opt,i)=>{
+    const checked=qMultiSel.includes(i);
+    return`<button class="opt-btn ${checked?'selected':''}" onclick="toggleMulti(${i})">
+      <div class="opt-check">${checked?'✓':''}</div>
+      <span>${opt.text}</span>
+    </button>
+    ${opt.hasInput&&checked?`<input class="quiz-other-input" placeholder="Descreva brevemente…" value="${qOtherText}" oninput="qOtherText=this.value">`:''}`;
+  }).join(''):opts.map((opt,i)=>{
+    const isSel=storedIdx===i;
+    return`<button class="opt-btn ${isSel?'selected':''}" data-idx="${i}" onclick="selectOpt(${opt.score},${i})">
+      <div class="opt-check">${isSel?'✓':''}</div>
+      <span>${opt.text}</span>
+    </button>`;
+  }).join('');
+
+  document.getElementById('quizWrap').innerHTML=`
+    <div class="quiz-progress">
+      <div class="quiz-progress-top"><span>${BLOCO_E[blocoIdx]} ${q.bloco}</span><span>${qCurrent+1} / ${BASE_QUESTIONS.length}</span></div>
+      <div class="quiz-track"><div class="quiz-fill" style="width:${pct}%"></div></div>
+      <div class="quiz-bloco-dots">
+        ${BLOCOS.map((_,i)=>`<div class="bloco-dot" style="background:${i<blocoIdx?'var(--lav)':i===blocoIdx?'var(--lav-m)':'var(--border)'}"></div>`).join('')}
+      </div>
+    </div>
+    <div class="quiz-bloco-label">${BLOCO_E[blocoIdx]} Pergunta ${qCurrent+1}</div>
+    <div class="quiz-question">${q.text}</div>
+    ${subLabel?`<div class="quiz-sub">${subLabel}</div>`:''}
+    <div class="options-list" id="optsList">${optsHTML}</div>
+    <div class="quiz-nav">
+      <button class="btn btn-outline btn-sm" onclick="quizBack()" ${qCurrent===0?'disabled':''}>← Voltar</button>
+      <span class="quiz-nav-info">${pct}% concluído</span>
+      <button class="btn btn-primary btn-sm" onclick="quizNext()" id="quizNextBtn" ${canNext?'':'disabled'}>
+        ${qCurrent+1===BASE_QUESTIONS.length?'Ver resultado 🌹':'Próxima →'}
+      </button>
+    </div>`;
+}
+
+// Track option index for re-render
+const qOptIdxMap={};
+function selectOpt(score,idx){
+  qSelected=score;
+  qOptIdxMap[qCurrent]=idx;
+  document.querySelectorAll('.opt-btn').forEach((btn,i)=>{
+    const chk=btn.querySelector('.opt-check');
+    btn.classList.toggle('selected',i===idx);
+    if(chk)chk.textContent=i===idx?'✓':'';
+  });
+  document.getElementById('quizNextBtn').disabled=false;
+}
+
+function toggleMulti(idx){
+  const i=qMultiSel.indexOf(idx);
+  if(i>=0)qMultiSel.splice(i,1);else qMultiSel.push(idx);
+  renderQuestion();
+}
+
+function quizNext(){
+  const q=BASE_QUESTIONS[qCurrent];
+  const opts=buildOptions(q);
+  let score;
+  if(q.type==='multi'){
+    if(qMultiSel.length===0)return;
+    score=Math.min(Math.max(...qMultiSel.map(i=>opts[i].score)),3);
+    const texts=qMultiSel.map(i=>opts[i].text).filter(t=>t!=='Outras');
+    if(q.key==='q2')qQ2Texts=texts;
+    if(q.key==='q8')qQ8Texts=texts;
+  } else {
+    if(qSelected===null&&qOptIdxMap[qCurrent]===undefined)return;
+    score=qSelected!==null?qSelected:qAnswers[qCurrent]?.score??0;
+  }
+
+  // Texto da opção selecionada para perguntas únicas
+  const selectedIdx=qOptIdxMap[qCurrent];
+  const selectedText=(!q.type||q.type!=='multi')&&selectedIdx!==undefined?opts[selectedIdx]?.text||'':'';
+
+  const answerDetail={
+    qId:q.id,
+    question:q.text,
+    bloco:q.bloco,
+    score,
+    selectedTexts:q.type==='multi'?qMultiSel.map(i=>opts[i].text):[selectedText],
+  };
+  qAnswers[qCurrent]=answerDetail;
+
+  if(qCurrent+1>=BASE_QUESTIONS.length){
+    finishQuiz();return;
+  }
+  qCurrent++;qSelected=null;qMultiSel=[];qOtherText='';
+  renderQuestion();
+}
+
+function quizBack(){
+  if(qCurrent===0)return;
+  const prev=qAnswers[qCurrent-1];
+  qCurrent--;qSelected=null;qMultiSel=[];
+  if(prev){
+    const q=BASE_QUESTIONS[qCurrent];
+    if(q.type==='multi'){
+      const opts=buildOptions(q);
+      qMultiSel=opts.reduce((acc,opt,i)=>{if(prev.selectedTexts.includes(opt.text))acc.push(i);return acc;},[]);
+    } else {
+      qSelected=prev.score;
+      const opts=buildOptions(q);
+      const foundIdx=opts.findIndex(o=>o.text===prev.selectedTexts?.[0]);
+      if(foundIdx>=0)qOptIdxMap[qCurrent]=foundIdx;
+    }
+  }
+  renderQuestion();
+}
+
+async function finishQuiz(){
+  const scores=qAnswers.map(a=>a.score);
+  const total=scores.reduce((a,b)=>a+b,0);
+  const profile=PROFILES.find(p=>total>=p.min&&total<=p.max)||PROFILES[PROFILES.length-1];
+  const pct=Math.round((total/66)*100);
+
+  // Bloco scores
+  const blocoScores=BLOCOS.map((b,bi)=>{
+    const[s,e]=BLOCO_RANGES[bi];
+    const slice=scores.slice(s,e);
+    const sum=slice.reduce((a,v)=>a+v,0);
+    return{bloco:b,sum,max:BLOCO_MAXES[bi],pct:Math.round((sum/BLOCO_MAXES[bi])*100)};
+  });
+
+  // Save to Supabase
+  await api('saveQuizResultado',{
+    usuario:currentUser,
+    pontuacao:total,
+    perfil:profile.title,
+    respostas:JSON.stringify(qAnswers),
+    bloco_scores:JSON.stringify(blocoScores),
+  });
+
+  // Reload history
+  const data=await api('getQuizResultados',{usuario:currentUser});
+  qUserHistory=Array.isArray(data)?data:[];
+
+  // Render result
+  document.getElementById('quizWrap').innerHTML=`
+    <div class="quiz-result">
+      <div class="result-emoji">${profile.emoji}</div>
+      <div class="result-eyebrow">Seu diagnóstico</div>
+      <div class="result-title">${profile.title}</div>
+      <div class="result-pts">${total} pontos de 66</div>
+      <div class="result-bar-wrap"><div class="result-bar-fill" style="width:${pct}%;background:${profile.cor}"></div></div>
+      <div class="result-bar-labels"><span>Início de Jornada</span><span>Plenitude Sexual</span></div>
+      <div class="result-blocos">
+        <h4>📊 Resultado por bloco</h4>
+        ${blocoScores.map((b,i)=>`
+          <div class="rb-item">
+            <div class="rb-label"><span>${BLOCO_E[i]} ${b.bloco}</span><span>${b.pct}%</span></div>
+            <div class="rb-track"><div class="rb-fill" style="width:${b.pct}%"></div></div>
+          </div>`).join('')}
+      </div>
+      <div class="result-desc">${profile.desc}</div>
+      <div class="result-tip">
+        <strong>🌹 Como a Val pode te ajudar</strong>
+        <p>${profile.tip}</p>
+      </div>
+      <div style="display:flex;gap:.65rem;flex-wrap:wrap">
+        <button class="btn btn-outline" style="flex:1;justify-content:center" onclick="showPage('chat')">💬 Conversar com a Val</button>
+        <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="renderQuizPage()">↩ Voltar ao início</button>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SENHA
+// ═══════════════════════════════════════════════════════════════
+function openPassModal(){document.getElementById('pOld').value='';document.getElementById('pNew').value='';document.getElementById('pConf').value='';document.getElementById('passModal').classList.add('open')}
+function closePass(){document.getElementById('passModal').classList.remove('open')}
+async function changePass(){
+  const o=document.getElementById('pOld').value,n=document.getElementById('pNew').value,c=document.getElementById('pConf').value;
+  if(!o||!n||!c){toast('Preencha todos os campos.');return}
+  if(n!==c){toast('As senhas não coincidem.');return}
+  if(n.length<4){toast('Senha deve ter ao menos 4 caracteres.');return}
+  const pd=await api('getPassword',{usuario:currentUser});
+  if(o!==(pd.senha||USERS[currentUser])){toast('Senha atual incorreta.');return}
+  await api('savePassword',{usuario:currentUser,senha:n});
+  await api('saveHistory',{usuario:currentUser,papel:'system',mensagem:'[Sistema] Usuário alterou a senha.'});
+  closePass();toast('✓ Senha alterada com sucesso!');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════════════════
+function openAdmin(){document.getElementById('adminGate').style.display='block';document.getElementById('adminPanel').style.display='none';document.getElementById('adminPw').value='';document.getElementById('adminModal').classList.add('open')}
+function closeAdmin(){document.getElementById('adminModal').classList.remove('open')}
+async function checkAdmin(){
+  const pw=document.getElementById('adminPw').value;
+  const pd=await api('getPassword',{usuario:'__admin__'});
+  if(pw!==(pd.senha||'admin2024')){toast('Senha incorreta.');return}
+  document.getElementById('adminGate').style.display='none';
+  document.getElementById('adminPanel').style.display='block';
+  loadCfgForm();loadKb();loadAllHistory();loadAdminProfiles();loadAdminIndicacoes();loadAdminSugestoes();
+}
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');document.getElementById('tab-'+name).classList.add('active');
+}
+
+// Config
+function loadCfgForm(){document.getElementById('cfgP').value=cfg.personality||'';document.getElementById('cfgT').value=cfg.topics||'';document.getElementById('cfgR').value=cfg.rules||'';document.getElementById('cfgW').value=cfg.welcome||''}
+function restoreDef(){if(!confirm('Restaurar padrões?'))return;document.getElementById('cfgP').value=DEFAULT_CONFIG.personality;document.getElementById('cfgT').value=DEFAULT_CONFIG.topics;document.getElementById('cfgR').value=DEFAULT_CONFIG.rules;document.getElementById('cfgW').value=DEFAULT_CONFIG.welcome}
+async function saveCfg(){
+  const p={personality:document.getElementById('cfgP').value,topics:document.getElementById('cfgT').value,rules:document.getElementById('cfgR').value,welcome:document.getElementById('cfgW').value};
+  const r=await api('saveConfig',p);
+  if(r&&(r.ok||!r.error)){cfg={...cfg,...p};toast('✓ Configuração salva!')}
+  else{toast('Erro ao salvar.');console.error(r)}
+}
+
+// KB
+let kbData=[];
+async function loadKb(){const d=await api('getKb');kbData=Array.isArray(d)?d:[];renderKb()}
+function renderKb(){
+  const list=document.getElementById('kbList');
+  if(!kbData.length){list.innerHTML='<div class="empty">Nenhum item ainda.</div>';return}
+  list.innerHTML=kbData.map(k=>`<div class="kb-item"><span class="kb-item-text" title="${k.conteudo}">${k.conteudo}</span><button class="btn btn-danger btn-sm" onclick="deleteKb('${k.id}')">✕</button></div>`).join('');
+}
+async function addKb(){
+  let text=document.getElementById('kbText').value.trim();
+  const file=document.getElementById('kbFile').files[0];
+  if(file){text=await file.text();document.getElementById('kbFile').value=''}
+  if(!text){toast('Escreva ou selecione um arquivo.');return}
+  const chunks=[];
+  if(text.length>1000){const paras=text.split(/\n\n+/);let chunk='';for(const p of paras){if((chunk+p).length>800&&chunk){chunks.push(chunk.trim());chunk=''}chunk+=p+'\n\n'}if(chunk.trim())chunks.push(chunk.trim())}
+  else chunks.push(text);
+  for(const c of chunks)await api('saveKb',{conteudo:c});
+  document.getElementById('kbText').value='';await loadKb();
+  toast(`✓ ${chunks.length>1?chunks.length+' entradas adicionadas!':'Conhecimento adicionado!'}`);
+}
+async function deleteKb(id){await api('deleteKb',{id});await loadKb();toast('Entrada removida.')}
+
+// History
+async function loadAllHistory(){
+  const data=await api('getAllHistory');
+  const list=document.getElementById('histList');
+  if(!data||!Array.isArray(data)||!data.length){list.innerHTML='<div class="empty">Nenhum histórico.</div>';return}
+  const byUser={};
+  data.forEach(r=>{if(!byUser[r.usuario])byUser[r.usuario]=[];byUser[r.usuario].push(r)});
+  list.innerHTML=Object.entries(byUser).map(([user,rows])=>{
+    const hasPw=rows.some(r=>r.papel==='system'&&r.mensagem?.includes('alterou a senha'));
+    const count=rows.filter(r=>r.papel!=='system').length;
+    const last=rows[0]?.created_at?new Date(rows[0].created_at).toLocaleDateString('pt-BR'):'';
+    const badge=hasPw?'<span class="hist-badge">🔒 senha alterada</span>':'';
+    const msgs=rows.map(r=>{
+      const cls=r.papel==='user'?'user':r.papel==='system'?'system':'bot';
+      const pre=r.papel==='user'?'👤':r.papel==='system'?'⚙️':'💜';
+      const dt=r.created_at?new Date(r.created_at).toLocaleString('pt-BR'):'';
+      return`<div class="hist-msg-row ${cls}">${pre} ${r.mensagem}<div class="hist-msg-date">${dt}</div></div>`;
+    }).join('');
+    return`<div class="hist-user">
+      <div class="hist-user-head" onclick="toggleEl('hh-${user}')">
+        <div><div class="hist-user-name">👤 ${user} ${badge}</div><div class="hist-user-meta">${count} mensagens · ${last}</div></div>
+        <div style="display:flex;gap:.4rem;align-items:center"><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteHist('${user}')">Apagar</button><span>▾</span></div>
+      </div>
+      <div class="hist-msgs" id="hh-${user}">${msgs}</div>
+    </div>`;
+  }).join('');
+}
+function toggleEl(id){document.getElementById(id)?.classList.toggle('open')}
+async function deleteHist(user){if(!confirm(`Apagar histórico de "${user}"?`))return;await api('deleteHistory',{usuario:user});await loadAllHistory();toast(`Histórico de ${user} apagado.`)}
+
+// ── ADMIN: PROFILES TAB ──────────────────────────────────────
+async function loadAdminProfiles(){
+  const list=document.getElementById('profilesList');
+  list.innerHTML='<div class="empty">Carregando…</div>';
+
+  // Get all quiz results grouped by user
+  const data=await api('getAllQuizResultados');
+  if(!data||!Array.isArray(data)||!data.length){list.innerHTML='<div class="empty">Nenhum resultado de quiz ainda.</div>';return}
+
+  // Group by user
+  const byUser={};
+  data.forEach(r=>{if(!byUser[r.usuario])byUser[r.usuario]=[];byUser[r.usuario].push(r)});
+
+  list.innerHTML=Object.entries(byUser).map(([user,results])=>{
+    const latest=results[0];
+    const profile=PROFILES.find(p=>p.title===latest.perfil)||PROFILES[0];
+    const blocoScores=latest.bloco_scores?JSON.parse(latest.bloco_scores):[];
+    const respostas=latest.respostas?JSON.parse(latest.respostas):[];
+    const date=latest.created_at?new Date(latest.created_at).toLocaleDateString('pt-BR'):'';
+
+    const blocoHTML=blocoScores.length?blocoScores.map((b,i)=>`
+      <div class="profile-score-bar">
+        <div class="psb-label"><span>${BLOCO_E[i]} ${b.bloco}</span><span>${b.pct}%</span></div>
+        <div class="psb-track"><div class="psb-fill" style="width:${b.pct}%"></div></div>
+      </div>`).join(''):'';
+
+    const respostasHTML=respostas.length?`
+      <div style="margin-top:.85rem">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.55rem">Respostas individuais</div>
+        <div class="profile-q-list">
+          ${respostas.map(a=>`
+            <div class="profile-q-item">
+              <div class="pqi-q">${a.bloco} · P${a.qId}: ${a.question}</div>
+              <div class="pqi-a">${Array.isArray(a.selectedTexts)?a.selectedTexts.join(', '):a.selectedTexts}</div>
+              <div class="pqi-score">Score: ${a.score}</div>
+            </div>`).join('')}
+        </div>
+      </div>`:'';
+
+    const histHTML=results.length>1?`
+      <div class="profile-hist-list" style="margin-top:.85rem">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.4rem">Histórico de realizações</div>
+        ${results.map((r,i)=>`
+          <div class="phi-item">
+            <div><div class="phi-title">${getProfileEmoji(r.perfil)} ${r.perfil}</div></div>
+            <div class="phi-meta">${new Date(r.created_at).toLocaleDateString('pt-BR')} · ${r.pontuacao} pts ${i===0?'<span style="color:var(--lav);font-weight:600">← atual</span>':''}</div>
+          </div>`).join('')}
+      </div>`:'';
+
+    return`<div class="profile-user-card">
+      <div class="profile-user-head" onclick="toggleEl('pu-${user}')">
+        <div>
+          <div class="profile-user-name">👤 ${user}</div>
+          <div class="profile-date">${date} · ${latest.pontuacao} pontos</div>
+        </div>
+        <span class="profile-result-badge">${profile.emoji} ${latest.perfil}</span>
+      </div>
+      <div class="profile-detail" id="pu-${user}">
+        ${blocoHTML}${respostasHTML}${histHTML}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Security
+async function saveAdminPass(){
+  const n=document.getElementById('nAdminP').value,c=document.getElementById('cAdminP').value;
+  if(!n){toast('Informe a nova senha.');return}
+  if(n!==c){toast('As senhas não coincidem.');return}
+  await api('savePassword',{usuario:'__admin__',senha:n});
+  toast('✓ Senha de administrador atualizada!');
+  document.getElementById('nAdminP').value='';document.getElementById('cAdminP').value='';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUGESTÕES — PÁGINA USUÁRIA
+// ═══════════════════════════════════════════════════════════════
+let sugTabAtivo = 'quiz';
+let sugEnviada  = false;
+
+async function renderSugPage() {
+  const wrap = document.getElementById('sugWrap');
+  wrap.innerHTML = '<div class="empty">Carregando…</div>';
+
+  const hist = await api('getSugestoes', { usuario: currentUser });
+  const minhas = Array.isArray(hist) ? hist : [];
+
+  sugEnviada = false;
+  wrap.innerHTML = buildSugPage(minhas);
+  mudarSugTab(sugTabAtivo);
+}
+
+function buildSugPage(minhas) {
+  // Histórico agrupado por tipo
+  const tipoLabel = { quiz:'📋 Quiz', historia:'📖 História', melhoria:'💡 Melhoria' };
+  const statusLabel = { pendente:'⏳ Pendente', em_analise:'🔍 Em análise', implementada:'✅ Implementada', recusada:'❌ Não implementada' };
+
+  const histHTML = minhas.length ? `
+    <div class="sug-hist-section">
+      <div class="sug-hist-title">Minhas sugestões enviadas</div>
+      ${minhas.map(s => `
+        <div class="sug-hist-item">
+          <div class="sug-hist-top">
+            <span class="sug-hist-tipo tipo-${s.tipo}">${tipoLabel[s.tipo]||s.tipo}</span>
+            <span class="sug-hist-date">${new Date(s.created_at).toLocaleDateString('pt-BR')}</span>
+          </div>
+          <div class="sug-hist-titulo">${s.titulo}</div>
+          <div class="sug-hist-desc">${s.descricao}</div>
+          <div class="sug-hist-status">
+            <span class="sug-status ${s.status}">${statusLabel[s.status]||s.status}</span>
+            ${s.nota_admin ? `<div class="sug-status-note">"${s.nota_admin}"</div>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>` : '';
+
+  return `
+    <div class="sug-header">
+      <div style="font-size:2rem;margin-bottom:.5rem">💡</div>
+      <h2>Suas ideias importam</h2>
+      <p>Sugira novos quiz, histórias interativas ou melhorias para o portal. Todas as sugestões são lidas e avaliadas.</p>
+    </div>
+    <div class="sug-tabs">
+      <button class="sug-tab active" id="stab-quiz" onclick="mudarSugTab('quiz')">📋<span>Novo Quiz</span></button>
+      <button class="sug-tab" id="stab-historia" onclick="mudarSugTab('historia')">📖<span>Nova História</span></button>
+      <button class="sug-tab" id="stab-melhoria" onclick="mudarSugTab('melhoria')">💡<span>Melhoria</span></button>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="sug-form-card" id="sform-quiz">
+      <h3>Propor um novo quiz</h3>
+      <p>Descreva o tema e o que você gostaria que o quiz explorasse. Quanto mais detalhes, melhor.</p>
+      <label class="fl">Título da proposta</label>
+      <input class="field" id="sug-quiz-titulo" maxlength="80" placeholder="Ex: Quiz sobre comunicação no relacionamento" oninput="document.getElementById('sc-quiz-t').textContent=this.value.length+'/80'">
+      <div class="sug-count"><span id="sc-quiz-t">0/80</span></div>
+      <label class="fl">O que este quiz deveria explorar?</label>
+      <textarea class="field" id="sug-quiz-desc" rows="4" maxlength="600" placeholder="Descreva o tema, as perguntas que gostaria de ver, o tipo de resultado esperado, por que acha que seria útil…" oninput="document.getElementById('sc-quiz-d').textContent=this.value.length+'/600'"></textarea>
+      <div class="sug-count"><span id="sc-quiz-d">0/600</span></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem">
+        <button class="btn btn-primary" onclick="enviarSugestao('quiz')">Enviar sugestão →</button>
+      </div>
+    </div>
+
+    <!-- HISTÓRIA -->
+    <div class="sug-form-card" id="sform-historia" style="display:none">
+      <h3>Propor uma história interativa</h3>
+      <p>Histórias interativas são narrativas onde você faz escolhas ao longo do caminho. Descreva o cenário que gostaria de explorar.</p>
+      <label class="fl">Título da proposta</label>
+      <input class="field" id="sug-hist-titulo" maxlength="80" placeholder="Ex: Uma noite em que ele assume o controle" oninput="document.getElementById('sc-hist-t').textContent=this.value.length+'/80'">
+      <div class="sug-count"><span id="sc-hist-t">0/80</span></div>
+      <label class="fl">Cenário e contexto</label>
+      <textarea class="field" id="sug-hist-cenario" rows="3" maxlength="400" placeholder="Onde acontece, quem são os personagens, qual o clima da história…" oninput="document.getElementById('sc-hist-c').textContent=this.value.length+'/400'"></textarea>
+      <div class="sug-count"><span id="sc-hist-c">0/400</span></div>
+      <label class="fl">O que você quer explorar ou sentir nessa história?</label>
+      <textarea class="field" id="sug-hist-desc" rows="3" maxlength="400" placeholder="Dinâmicas, emoções, situações específicas, fantasias que gostaria de ver exploradas…" oninput="document.getElementById('sc-hist-d').textContent=this.value.length+'/400'"></textarea>
+      <div class="sug-count"><span id="sc-hist-d">0/400</span></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem">
+        <button class="btn btn-primary" onclick="enviarSugestao('historia')">Enviar sugestão →</button>
+      </div>
+    </div>
+
+    <!-- MELHORIA -->
+    <div class="sug-form-card" id="sform-melhoria" style="display:none">
+      <h3>Sugerir uma melhoria</h3>
+      <p>Algo que poderia funcionar melhor, uma funcionalidade nova, uma crítica construtiva — tudo é bem-vindo.</p>
+      <label class="fl">Categoria</label>
+      <select class="field" id="sug-mel-cat">
+        <option value="">Selecione…</option>
+        <option>Interface e navegação</option>
+        <option>Chat com a Val</option>
+        <option>Conteúdo e temas</option>
+        <option>Quiz e resultados</option>
+        <option>Segurança e privacidade</option>
+        <option>Outra</option>
+      </select>
+      <label class="fl">Título da sugestão</label>
+      <input class="field" id="sug-mel-titulo" maxlength="80" placeholder="Resumo em uma frase" oninput="document.getElementById('sc-mel-t').textContent=this.value.length+'/80'">
+      <div class="sug-count"><span id="sc-mel-t">0/80</span></div>
+      <label class="fl">Descrição detalhada</label>
+      <textarea class="field" id="sug-mel-desc" rows="4" maxlength="600" placeholder="Descreva o problema que identificou ou a melhoria que imagina, e como isso tornaria o portal melhor para você…" oninput="document.getElementById('sc-mel-d').textContent=this.value.length+'/600'"></textarea>
+      <div class="sug-count"><span id="sc-mel-d">0/600</span></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem">
+        <button class="btn btn-primary" onclick="enviarSugestao('melhoria')">Enviar sugestão →</button>
+      </div>
+    </div>
+
+    ${histHTML}`;
+}
+
+function mudarSugTab(tipo) {
+  sugTabAtivo = tipo;
+  ['quiz','historia','melhoria'].forEach(t => {
+    const tab  = document.getElementById('stab-'+t);
+    const form = document.getElementById('sform-'+t);
+    if(tab)  tab.classList.toggle('active', t === tipo);
+    if(form) form.style.display = t === tipo ? 'block' : 'none';
+  });
+}
+
+async function enviarSugestao(tipo) {
+  let titulo = '', descricao = '', extra = '';
+
+  if (tipo === 'quiz') {
+    titulo    = document.getElementById('sug-quiz-titulo')?.value.trim();
+    descricao = document.getElementById('sug-quiz-desc')?.value.trim();
+  } else if (tipo === 'historia') {
+    titulo    = document.getElementById('sug-hist-titulo')?.value.trim();
+    const cen = document.getElementById('sug-hist-cenario')?.value.trim();
+    const des = document.getElementById('sug-hist-desc')?.value.trim();
+    descricao = [cen && `Cenário: ${cen}`, des && `O que explorar: ${des}`].filter(Boolean).join('\n\n');
+  } else if (tipo === 'melhoria') {
+    const cat = document.getElementById('sug-mel-cat')?.value;
+    titulo    = document.getElementById('sug-mel-titulo')?.value.trim();
+    descricao = document.getElementById('sug-mel-desc')?.value.trim();
+    if (cat) descricao = `Categoria: ${cat}\n\n${descricao}`;
+  }
+
+  if (!titulo)              { toast('Informe um título para a sugestão.'); return; }
+  if (!descricao || descricao.length < 20) { toast('A descrição precisa ter ao menos 20 caracteres.'); return; }
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Enviando…';
+
+  const r = await api('saveSugestao', {
+    usuario: currentUser,
+    tipo,
+    titulo,
+    descricao,
+    status: 'pendente'
+  });
+
+  btn.disabled = false; btn.textContent = 'Enviar sugestão →';
+
+  if (r && (r.ok || !r.error)) {
+    toast('✓ Sugestão enviada! Obrigada pela contribuição.');
+    renderSugPage();
+  } else {
+    toast('Erro ao enviar. Tente novamente.'); console.error(r);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUGESTÕES — ADMIN
+// ═══════════════════════════════════════════════════════════════
+let allSugestoes = [];
+let sugFiltro = 'todas';
+
+async function loadAdminSugestoes() {
+  const data = await api('getAllSugestoes');
+  allSugestoes = Array.isArray(data) ? data : [];
+  renderAdminSugestoes();
+}
+
+function filterSug(filtro, btn) {
+  sugFiltro = filtro;
+  document.querySelectorAll('#tab-sugestoes-adm .btn-sm').forEach(b => {
+    b.style.borderColor = ''; b.style.color = '';
+  });
+  if (btn) { btn.style.borderColor = 'var(--lav)'; btn.style.color = 'var(--lav)'; }
+  renderAdminSugestoes();
+}
+
+function renderAdminSugestoes() {
+  const list = document.getElementById('adminSugList');
+  if (!list) return;
+
+  const tipoLabel  = { quiz:'📋 Quiz', historia:'📖 História', melhoria:'💡 Melhoria' };
+  const statusOpts = ['pendente','em_analise','implementada','recusada'];
+  const statusLabel= { pendente:'⏳ Pendente', em_analise:'🔍 Em análise', implementada:'✅ Implementada', recusada:'❌ Recusada' };
+
+  let filtered = allSugestoes;
+  if (sugFiltro === 'pendente') filtered = allSugestoes.filter(s => s.status === 'pendente');
+  else if (['quiz','historia','melhoria'].includes(sugFiltro)) filtered = allSugestoes.filter(s => s.tipo === sugFiltro);
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">Nenhuma sugestão encontrada.</div>'; return;
+  }
+
+  list.innerHTML = filtered.map(s => {
+    const date  = new Date(s.created_at).toLocaleDateString('pt-BR');
+    const stOpts = statusOpts.map(st =>
+      `<option value="${st}" ${s.status===st?'selected':''}>${statusLabel[st]}</option>`).join('');
+
+    return `
+      <div class="adm-sug-item" id="adm-sug-${s.id}">
+        <div class="adm-sug-head">
+          <div>
+            <div class="adm-sug-meta">👤 ${s.usuario} · ${tipoLabel[s.tipo]||s.tipo} · ${date}</div>
+            <div class="adm-sug-titulo">${s.titulo}</div>
+          </div>
+          <span class="sug-status ${s.status}">${statusLabel[s.status]||s.status}</span>
+        </div>
+        <div class="adm-sug-desc">${s.descricao.replace(/\n/g,'<br>')}</div>
+        <div class="adm-sug-actions">
+          <select class="field adm-sug-note-input" id="sug-status-${s.id}" style="flex:0;width:auto;font-size:.78rem;padding:.35rem .6rem;min-height:unset">
+            ${stOpts}
+          </select>
+          <input class="field adm-sug-note-input" type="text" id="sug-nota-${s.id}" placeholder="Nota para a usuária (opcional)" value="${s.nota_admin||''}" style="font-size:.78rem;padding:.35rem .6rem;min-height:unset">
+          <button class="btn btn-primary btn-sm" onclick="atualizarSugestao('${s.id}')">Salvar</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function atualizarSugestao(id) {
+  const status    = document.getElementById(`sug-status-${id}`)?.value;
+  const nota_admin= document.getElementById(`sug-nota-${id}`)?.value.trim() || null;
+
+  const r = await api('updateSugestao', { id, status, nota_admin });
+  if (r && (r.ok || !r.error)) {
+    toast('✓ Sugestão atualizada!');
+    allSugestoes = allSugestoes.map(s => s.id==id ? {...s, status, nota_admin} : s);
+    renderAdminSugestoes();
+  } else {
+    toast('Erro ao salvar.'); console.error(r);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INDICAÇÕES — PÁGINA USUÁRIA
+// ═══════════════════════════════════════════════════════════════
+let indRequisitos = { min_quiz: 1, min_dias: 30 };
+let indFiltro = 'todas';
+
+async function renderIndPage() {
+  const wrap = document.getElementById('indWrap');
+  wrap.innerHTML = '<div class="empty">Carregando…</div>';
+
+  // Carregar requisitos configurados pelo admin
+  const req = await api('getRequisitos');
+  if (req && !req.error) indRequisitos = req;
+
+  // Verificar elegibilidade da usuária
+  const elegivel = await verificarElegibilidade();
+
+  // Histórico de indicações da usuária
+  const hist = await api('getIndicacoes', { usuario: currentUser });
+  const indicacoes = Array.isArray(hist) ? hist : [];
+
+  let html = `
+    <div class="ind-header">
+      <div style="font-size:2rem;margin-bottom:.5rem">🤝</div>
+      <h2>Indicar uma amiga</h2>
+      <p>Indique uma pessoa de confiança para fazer parte da nossa comunidade. Ela passará por uma avaliação antes de receber o acesso.</p>
+    </div>`;
+
+  // Card de requisitos
+  html += `
+    <div class="req-card">
+      <h3>Requisitos para indicar</h3>
+      <div class="req-item">
+        <span class="req-item-label">Quiz respondidos</span>
+        <span class="req-item-status ${elegivel.quiz ? 'req-ok' : 'req-fail'}">
+          ${elegivel.quiz ? '✓' : '✗'} ${elegivel.quizFeitos} de ${indRequisitos.min_quiz} necessário${indRequisitos.min_quiz !== 1 ? 's' : ''}
+        </span>
+      </div>
+      <div class="req-item">
+        <span class="req-item-label">Tempo no portal</span>
+        <span class="req-item-status ${elegivel.dias ? 'req-ok' : 'req-fail'}">
+          ${elegivel.dias ? '✓' : '✗'} ${elegivel.diasNoPortal} de ${indRequisitos.min_dias} dias necessários
+        </span>
+      </div>
+    </div>`;
+
+  if (!elegivel.ok) {
+    html += `
+      <div class="req-bloqueio">
+        <strong>⏳ Você ainda não pode indicar</strong>
+        <span>Complete os requisitos acima para desbloquear esta funcionalidade.</span>
+      </div>`;
+  } else {
+    // Formulário
+    html += `
+      <div class="ind-form">
+        <h3>Nova indicação</h3>
+        <div class="ind-form-grid">
+          <div class="field-group">
+            <label>Nome ou apelido</label>
+            <input class="field" id="indNome" type="text" placeholder="Como ela se chama">
+          </div>
+          <div class="field-group">
+            <label>Idade</label>
+            <input class="field" id="indIdade" type="number" min="18" max="99" placeholder="Ex: 34">
+          </div>
+          <div class="field-group">
+            <label>Estado civil</label>
+            <select class="field" id="indEstado">
+              <option value="">Selecione…</option>
+              <option>Solteira</option>
+              <option>Casada</option>
+              <option>Divorciada</option>
+              <option>Viúva</option>
+              <option>União estável</option>
+              <option>Prefere não dizer</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Meio de contato preferido</label>
+            <div class="radio-group">
+              <label class="radio-opt"><input type="radio" name="indContato" value="email" checked> E-mail</label>
+              <label class="radio-opt"><input type="radio" name="indContato" value="telefone"> Telefone</label>
+            </div>
+          </div>
+          <div class="field-group full">
+            <label>Contato (e-mail ou telefone)</label>
+            <input class="field" id="indContato" type="text" placeholder="email@exemplo.com ou (11) 99999-9999">
+          </div>
+          <div class="field-group full">
+            <label>Descrição — personalidade e contexto da relação</label>
+            <textarea class="field" id="indDesc" rows="3" placeholder="Como vocês se conheceram, por que acredita que ela se beneficiaria do portal, como você a descreveria…"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:1rem">
+          <button class="btn btn-primary" onclick="enviarIndicacao()">Enviar indicação →</button>
+        </div>
+      </div>`;
+  }
+
+  // Histórico de indicações
+  if (indicacoes.length) {
+    html += `
+      <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.65rem">Minhas indicações</div>
+      <div class="ind-hist-list">
+        ${indicacoes.map(ind => {
+          const statusLabel = { pendente: '⏳ Pendente', aprovada: '✅ Aprovada', recusada: '❌ Recusada' };
+          const date = new Date(ind.created_at).toLocaleDateString('pt-BR');
+          const motivoHTML = ind.status !== 'pendente' && ind.motivo_admin
+            ? `<div class="ind-hist-motivo">Nota do administrador: "${ind.motivo_admin}"</div>` : '';
+          return `
+            <div class="ind-hist-item">
+              <div class="ind-hist-top">
+                <div>
+                  <div class="ind-hist-nome">${ind.nome_indicada}, ${ind.idade} anos · ${ind.estado_civil}</div>
+                  <div class="ind-hist-date">${date}</div>
+                </div>
+                <span class="ind-status ${ind.status}">${statusLabel[ind.status] || ind.status}</span>
+              </div>
+              <div class="ind-hist-desc">${ind.descricao}</div>
+              ${motivoHTML}
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
+  wrap.innerHTML = html;
+}
+
+async function verificarElegibilidade() {
+  // Quiz feitos
+  const qr = await api('getQuizResultados', { usuario: currentUser });
+  const quizFeitos = Array.isArray(qr) ? qr.length : 0;
+
+  // Dias no portal — baseado na primeira mensagem no histórico
+  const hist = await api('getHistory', { usuario: currentUser });
+  let diasNoPortal = 0;
+  if (Array.isArray(hist) && hist.length) {
+    const primeira = new Date(hist[0].created_at);
+    diasNoPortal = Math.floor((Date.now() - primeira.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  const quizOk = quizFeitos >= indRequisitos.min_quiz;
+  const diasOk = diasNoPortal >= indRequisitos.min_dias;
+
+  return { ok: quizOk && diasOk, quiz: quizOk, dias: diasOk, quizFeitos, diasNoPortal };
+}
+
+async function enviarIndicacao() {
+  const nome    = document.getElementById('indNome')?.value.trim();
+  const idade   = document.getElementById('indIdade')?.value;
+  const estado  = document.getElementById('indEstado')?.value;
+  const contato = document.getElementById('indContato')?.value.trim();
+  const desc    = document.getElementById('indDesc')?.value.trim();
+  const meio    = document.querySelector('input[name="indContato"]:checked')?.value || 'email';
+
+  if (!nome)   { toast('Informe o nome ou apelido.'); return; }
+  if (!idade || idade < 18) { toast('Informe uma idade válida (mínimo 18 anos).'); return; }
+  if (!estado) { toast('Selecione o estado civil.'); return; }
+  if (!contato){ toast('Informe um meio de contato.'); return; }
+  if (!desc || desc.length < 20) { toast('A descrição precisa ter ao menos 20 caracteres.'); return; }
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Enviando…';
+
+  const r = await api('saveIndicacao', {
+    indicante: currentUser,
+    nome_indicada: nome,
+    idade: parseInt(idade),
+    estado_civil: estado,
+    meio_contato: meio,
+    contato: contato,
+    descricao: desc,
+    status: 'pendente'
+  });
+
+  btn.disabled = false; btn.textContent = 'Enviar indicação →';
+
+  if (r && (r.ok || !r.error)) {
+    toast('✓ Indicação enviada com sucesso!');
+    renderIndPage();
+  } else {
+    toast('Erro ao enviar. Tente novamente.');
+    console.error(r);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INDICAÇÕES — ADMIN
+// ═══════════════════════════════════════════════════════════════
+let allIndicacoes = [];
+
+async function loadAdminIndicacoes() {
+  // Carregar e preencher campos de requisitos
+  const req = await api('getRequisitos');
+  if (req && !req.error) {
+    document.getElementById('reqQuiz').value = req.min_quiz ?? 1;
+    document.getElementById('reqDias').value = req.min_dias ?? 30;
+  }
+  // Carregar indicações
+  const data = await api('getAllIndicacoes');
+  allIndicacoes = Array.isArray(data) ? data : [];
+  renderAdminIndicacoes();
+}
+
+function filterInd(status, btn) {
+  indFiltro = status;
+  document.querySelectorAll('#tab-indicacoes .btn-sm').forEach(b => {
+    b.style.borderColor = ''; b.style.color = '';
+  });
+  if (btn) { btn.style.borderColor = 'var(--lav)'; btn.style.color = 'var(--lav)'; }
+  renderAdminIndicacoes();
+}
+
+function renderAdminIndicacoes() {
+  const list = document.getElementById('adminIndList');
+  const filtered = indFiltro === 'todas' ? allIndicacoes : allIndicacoes.filter(i => i.status === indFiltro);
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty">Nenhuma indicação ${indFiltro !== 'todas' ? indFiltro : ''} encontrada.</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(ind => {
+    const date = new Date(ind.created_at).toLocaleDateString('pt-BR');
+    const meioIcon = ind.meio_contato === 'email' ? '📧' : '📱';
+    const statusLabel = { pendente: '⏳ Pendente', aprovada: '✅ Aprovada', recusada: '❌ Recusada' };
+    const isPendente = ind.status === 'pendente';
+
+    const acoes = isPendente ? `
+      <input class="field adm-ind-motivo" type="text" placeholder="Nota (opcional)…" id="motivo-${ind.id}" style="font-size:.78rem;padding:.38rem .6rem;min-height:unset">
+      <button class="btn btn-sm" style="background:#D1FAE5;color:#065F46" onclick="decidirIndicacao('${ind.id}','aprovada')">✅ Aprovar</button>
+      <button class="btn btn-danger btn-sm" onclick="decidirIndicacao('${ind.id}','recusada')">❌ Recusar</button>` :
+      `<span class="ind-status ${ind.status}">${statusLabel[ind.status]}</span>
+       ${ind.motivo_admin ? `<span style="font-size:.73rem;color:var(--muted);font-style:italic">"${ind.motivo_admin}"</span>` : ''}`;
+
+    return `
+      <div class="adm-ind-item" id="adm-ind-${ind.id}">
+        <div class="adm-ind-head">
+          <div>
+            <div class="adm-ind-indicante">Indicada por: <strong>${ind.indicante}</strong> · ${date}</div>
+            <div class="adm-ind-nome">${ind.nome_indicada}</div>
+          </div>
+        </div>
+        <div class="adm-ind-info">
+          <div class="adm-ind-field">🎂 Idade: <strong>${ind.idade} anos</strong></div>
+          <div class="adm-ind-field">💍 Estado civil: <strong>${ind.estado_civil}</strong></div>
+          <div class="adm-ind-field">${meioIcon} Contato: <strong>${ind.contato}</strong></div>
+          <div class="adm-ind-field">📋 Via: <strong>${ind.meio_contato}</strong></div>
+        </div>
+        <div class="adm-ind-desc">${ind.descricao}</div>
+        <div class="adm-ind-actions">${acoes}</div>
+      </div>`;
+  }).join('');
+}
+
+async function decidirIndicacao(id, status) {
+  const motivoEl = document.getElementById(`motivo-${id}`);
+  const motivo = motivoEl ? motivoEl.value.trim() : '';
+
+  const r = await api('updateIndicacao', { id, status, motivo_admin: motivo });
+  if (r && (r.ok || !r.error)) {
+    toast(`✓ Indicação ${status === 'aprovada' ? 'aprovada' : 'recusada'} com sucesso!`);
+    allIndicacoes = allIndicacoes.map(i => i.id == id ? { ...i, status, motivo_admin: motivo } : i);
+    renderAdminIndicacoes();
+  } else {
+    toast('Erro ao atualizar. Verifique o console.');
+    console.error(r);
+  }
+}
+
+async function saveRequisitos() {
+  const min_quiz = parseInt(document.getElementById('reqQuiz').value) || 1;
+  const min_dias = parseInt(document.getElementById('reqDias').value) || 30;
+  const r = await api('saveRequisitos', { min_quiz, min_dias });
+  if (r && (r.ok || !r.error)) {
+    indRequisitos = { min_quiz, min_dias };
+    toast('✓ Requisitos atualizados!');
+  } else {
+    toast('Erro ao salvar requisitos.');
+  }
+}
+
+// Close on overlay
+document.getElementById('passModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePass()});
+document.getElementById('adminModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAdmin()});
+</script>
+</body>
+</html>
